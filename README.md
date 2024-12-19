@@ -18,15 +18,15 @@ rokit install
 
 Many of the scripts exists as VSCode tasks (check [.vscode/tasks.json](https://github.com/ewd3v/platesOfDoom/blob/main/.vscode/tasks.json)).
 
-#### Build
+### Build
 
 Builds the client and server scripts (what's required for the sb scripts).
 
-#### Build .rbxlx
+### Build .rbxlx
 
 Builds the place file with rojo (outputs to platesOfDoom.rbxlx).
 
-#### Build Game
+### Build Game
 
 Runs first the "Build" task then the "Build .rbxlx" task, should be ran when building the place file from scratch.
 
