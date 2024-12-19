@@ -1,0 +1,66 @@
+{
+  "name": "platesOfDoom",
+  "tree": {
+    "$className": "DataModel",
+
+    "ReplicatedStorage": {
+      "Assets": {
+        "$className": "Folder",
+
+        "Client": {
+          "$path": "assets/client"
+        },
+
+        "Shared": {
+          "$path": "assets/shared"
+        }
+      }
+    },
+
+    "ServerScriptService": {
+      "Assets": {
+        "$path": "assets/server"
+      },
+
+      "Server": {
+        "$path": "out/server.server.luau"
+      }
+    },
+
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "Client": {
+          "$path": "out/client.client.luau"
+        }
+      }
+    },
+
+    "Workspace": {
+      "$properties": {
+        "FilteringEnabled": true
+      }
+    },
+
+    "Lighting": {
+      "$properties": {
+        "Ambient": [0, 0, 0],
+        "Brightness": 2,
+        "GlobalShadows": true,
+        "Outlines": false,
+        "Technology": "ShadowMap"
+      }
+    },
+
+    "TextChatService": {
+      "$properties": {
+        "ChatVersion": "TextChatService"
+      }
+    },
+
+    "SoundService": {
+      "$properties": {
+        "RespectFilteringEnabled": true
+      }
+    }
+  }
+}
