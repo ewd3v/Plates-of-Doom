@@ -17,11 +17,13 @@
       }
     },
 
-    "ServerScriptService": {
+    "ServerStorage": {
       "Assets": {
         "$path": "assets/server"
-      },
+      }
+    },
 
+    "ServerScriptService": {
       "Server": {
         "$path": "out/server.server.luau"
       }

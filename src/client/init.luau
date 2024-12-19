@@ -1,1 +1,2 @@
-print("Hello World!")
+local Assets = require("shared/assets")
+print("Assets:", Assets)
