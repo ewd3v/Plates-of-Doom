@@ -8,7 +8,7 @@ A rework of an old script builder script I made.
 
 You will need [Rokit](https://github.com/rojo-rbx/rokit) in order to install all the requires tools (or manually install them, check [rokit.toml](https://github.com/ewd3v/platesOfDoom/blob/main/rokit.toml)).
 
-Then simply run:
+After installing Rokit, simply run to install all the required tools:
 
 ```bash
 rokit install
