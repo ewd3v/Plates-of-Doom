@@ -1,4 +1,4 @@
-# platesOfDoom (Work in Progress)
+# Plates of Doom (Work in Progress)
 
 An SB Script + game, combined.
 
