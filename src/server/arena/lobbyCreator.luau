@@ -20,8 +20,8 @@ return function(origin: Vector3, arenaSize: number): Model
 
 			local function createSpawn(x: number, z: number)
 				local spawnPart = newPart(if _G.IsGameBuild then "SpawnLocation" else "Part")
-				spawnPart.Size = Vector3.new(8, 0.1, 8)
-				spawnPart.Position = position + Vector3.new(x, 0.55, z)
+				spawnPart.Size = Vector3.new(8, 0.5, 8)
+				spawnPart.Position = position + Vector3.new(x, 0.75, z)
 				spawnPart.Parent = lobby
 
 				local decal = Instance.new("Decal")
