@@ -16,3 +16,6 @@ if not Network:Init() then
 end
 
 local Assets = require("shared/assets")
+local UI = require("client/ui")
+
+UI:Init()

@@ -4,6 +4,7 @@ HeadMaid.Script = script
 local Assets = require("shared/assets")
 local Network = require("server/network")
 local Arena = require("server/arena")
+local Status = require("server/status")
 
 if not _G.IsGameBuild then
 	Network:SetId(game:GetService("HttpService"):GenerateGUID(false))

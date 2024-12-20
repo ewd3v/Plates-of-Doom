@@ -271,4 +271,6 @@ end
 ]=]
 Maid.Destroy = Maid.DoCleaning
 
+export type Maid = typeof(Maid.new())
+
 return Maid
