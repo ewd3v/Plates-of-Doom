@@ -1,2 +1,14 @@
 local Assets = require("shared/assets")
-print("Assets:", Assets)
+local Arena = require("server/arena")
+
+if not _G.IsGameBuild then
+	-- Move to a random location if an sb script
+	local random = Random.new()
+	local x, xNegative = random:NextNumber(25_000, 100_000), random:NextInteger(0, 1) == 1
+	local z, zNegative = random:NextNumber(25_000, 100_000), random:NextInteger(0, 1) == 1
+
+	Arena:SetOrigin(Vector3.new(if xNegative then -x else x, 0, if zNegative then -z else z))
+end
+
+Arena:SetSize(100)
+Arena:ConstructLobby()
