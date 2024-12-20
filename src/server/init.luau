@@ -1,5 +1,12 @@
 local Assets = require("shared/assets")
+local Network = require("server/network")
 local Arena = require("server/arena")
+
+if not _G.IsGameBuild then
+	Network:SetId(game:GetService("HttpService"):GenerateGUID(false))
+end
+
+Network:Init()
 
 if not _G.IsGameBuild then
 	-- Move to a random location if an sb script
