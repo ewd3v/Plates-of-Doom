@@ -132,8 +132,14 @@ function Network:InvokeServer(invoke: string, ...)
 	return signal:Wait()
 end
 
-function Network.event(name: string, callback: (...any) -> ())
+function Network.event(name: string, callback: (...any) -> ()): () -> ()
 	Network.Events[name] = callback
+
+	return function()
+		if Network.Events[name] == callback then
+			Network.Events[name] = nil
+		end
+	end
 end
 
 return Network

@@ -221,12 +221,24 @@ function Network:FireAllClients(event: string, ...)
 	end
 end
 
-function Network.event(name: string, callback: (Player, ...any) -> ())
+function Network.event(name: string, callback: (Player, ...any) -> ()): () -> ()
 	Network.Events[name] = callback
+
+	return function()
+		if Network.Events[name] == callback then
+			Network.Events[name] = nil
+		end
+	end
 end
 
-function Network.invoke(name: string, callback: (Player, ...any) -> ())
+function Network.invoke(name: string, callback: (Player, ...any) -> ()): () -> ()
 	Network.Invokes[name] = callback
+
+	return function()
+		if Network.Invokes[name] == callback then
+			Network.Invokes[name] = nil
+		end
+	end
 end
 
 return Network
