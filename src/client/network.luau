@@ -1,9 +1,8 @@
 local Maid = require("shared/maid")
 local Signal = require("shared/signal")
-local Scheduler = require("shared/scheduler")
+local HeadMaid = require("shared/headMaid")
 
 local HttpService = game:GetService("HttpService")
-local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Methods = require("shared/network/methods")
@@ -11,7 +10,7 @@ local Methods = require("shared/network/methods")
 type Key = { Server: string, Client: string }
 
 local Network = {}
-Network.Maid = Maid.new()
+Network.Maid = HeadMaid:Add(Maid.new())
 Network.Id = require("shared/network/defaultId")
 Network.Key = nil :: Key?
 Network.ConnectResult = Network.Maid:Add(Signal.new()) :: Signal.Signal<boolean>
@@ -56,10 +55,6 @@ local function send(method, ...)
 			end
 		end, ...)
 	end
-end
-
-function Network:Destroy()
-	Network.Maid:Destroy()
 end
 
 function Network:SetId(id: string)

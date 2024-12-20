@@ -1,3 +1,6 @@
+local HeadMaid = require("shared/headMaid")
+HeadMaid.Script = script
+
 local Network = require("client/network")
 
 if not _G.IsGameBuild then
@@ -9,9 +12,7 @@ end
 
 -- Check if it failed to connect (meaning we're not the correct client, so we should quit)
 if not Network:Init() then
-	-- TODO: Cleanup system
-	Network:Destroy()
-	return
+	return HeadMaid:Destroy()
 end
 
 local Assets = require("shared/assets")

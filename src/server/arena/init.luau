@@ -1,9 +1,12 @@
+local HeadMaid = require("shared/headMaid")
+local Maid = require("shared/Maid")
+
 local lobbyCreator = require("./lobbyCreator")
 
 local Arena = {}
+Arena.Maid = HeadMaid:Add(Maid.new())
 Arena.Origin = Vector3.zero
 Arena.Size = 0
-Arena.Lobby = nil :: Model?
 
 function Arena:SetOrigin(origin: Vector3)
 	Arena.Origin = origin
@@ -14,21 +17,14 @@ function Arena:SetSize(size: number)
 end
 
 function Arena:ConstructLobby()
-	Arena:RemoveLobby()
-
 	local lobby = lobbyCreator(Arena.Origin, Arena.Size)
-	Arena.Lobby = lobby
+	Arena.Maid.Lobby = lobby
 
 	lobby.Parent = workspace
 end
 
 function Arena:RemoveLobby()
-	if not Arena.Lobby then
-		return
-	end
-
-	Arena.Lobby:Destroy()
-	Arena.MLobbyodel = nil
+	Arena.Maid.Lobby = nil
 end
 
 return Arena

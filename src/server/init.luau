@@ -1,3 +1,6 @@
+local HeadMaid = require("shared/headMaid")
+HeadMaid.Script = script
+
 local Assets = require("shared/assets")
 local Network = require("server/network")
 local Arena = require("server/arena")

@@ -134,6 +134,7 @@ local function update(dtUpdate)
 	debug.profileend()
 end
 
-RunService.Heartbeat:Connect(update)
+local updateLoop = RunService.Heartbeat:Connect(update)
+require("shared/headMaid"):GiveTask(updateLoop)
 
 return Scheduler

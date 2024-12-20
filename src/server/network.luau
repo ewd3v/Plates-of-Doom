@@ -1,6 +1,7 @@
 local Maid = require("shared/maid")
 local Signal = require("shared/signal")
 local Scheduler = require("shared/scheduler")
+local HeadMaid = require("shared/headMaid")
 
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -12,7 +13,7 @@ local Methods = require("shared/network/methods")
 type Key = { Server: string, Client: string }
 
 local Network = {}
-Network.Maid = Maid.new()
+Network.Maid = HeadMaid:Add(Maid.new())
 Network.Id = require("shared/network/defaultId")
 Network.Connected = Network.Maid:Add(Signal.new()) :: Signal.Signal<Player>
 Network.Disconnected = Network.Maid:Add(Signal.new()) :: Signal.Signal<Player>
@@ -21,6 +22,10 @@ Network.ListeningPlayers = (if not _G.IsGameBuild then {} else nil) :: { [Player
 Network.PlayerKeys = (if not _G.IsGameBuild then {} else nil) :: { [Player]: Key } -- Holds keys for players, only needed outside of game environment to provide a really basic anti-tamper and to easily let the client know it's supposed to run (in cases where 2 ran at the same time)
 Network.Events = {} :: { [string]: (Player, ...any) -> () }
 Network.Invokes = {} :: { [string]: (Player, ...any) -> () }
+
+Network.Maid:GiveTask(function()
+	table.clear(Network.ConnectedPlayers) -- Force the loop below to quit
+end)
 
 local function send(player: Player, method, ...)
 	if _G.IsGameBuild then
@@ -42,10 +47,6 @@ local function send(player: Player, method, ...)
 			Network.Maid.Remote:FireClient(player, Network:GetKey(player), method, ...)
 		end, ...)
 	end
-end
-
-function Network:Destroy()
-	Network.Maid:Destroy()
 end
 
 function Network:SetId(id: string)
@@ -212,6 +213,12 @@ end
 
 function Network:FireClient(player: Player, event: string, ...)
 	send(player, Methods.Client.Event, event, ...)
+end
+
+function Network:FireAllClients(event: string, ...)
+	for player in Network.ConnectedPlayers do
+		send(player, Methods.Client.Event, event, ...)
+	end
 end
 
 function Network.event(name: string, callback: (Player, ...any) -> ())
