@@ -1,4 +1,4 @@
-return function(origin: Vector3, arenaSize: number): Model
+return function(origin: Vector3, arenaSize: number, lavaHeight: number): Model
 	local lobby = Instance.new("Folder")
 
 	local function newPart(class: string?): BasePart
@@ -88,6 +88,18 @@ return function(origin: Vector3, arenaSize: number): Model
 		makePath(origin - xOffset, 90)
 		makePath(origin + zOffset, 180)
 		makePath(origin + xOffset, 270)
+	end
+
+	-- Lava
+	do
+		local width = 5
+
+		local lava = newPart()
+		lava.CanCollide = false
+		lava.Position = origin + Vector3.yAxis * (lavaHeight - width / 2)
+		lava.Size = Vector3.new(arenaSize, width, arenaSize)
+		lava.Material = Enum.Material.Neon
+		lava.Color = Color3.fromRGB(211, 56, 17)
 	end
 
 	return lobby
