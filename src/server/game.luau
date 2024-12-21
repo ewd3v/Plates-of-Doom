@@ -21,6 +21,14 @@ local function assignAllTeam(team)
 	end
 end
 
+function Game:GetPlaying(): { Player }
+	return Teams:GetPlayers(Team.Playing)
+end
+
+function Game:GetAmountPlaying()
+	return Teams:GetAmount(Team.Playing)
+end
+
 function Game:Intermission()
 	local duration = if RunService:IsStudio() then 5 else 15
 	local playersNeeded = if RunService:IsStudio() then 1 else 2
@@ -58,8 +66,8 @@ function Game:StartGame()
 
 	assignAllTeam(Team.Playing)
 
-	local playerAmount = Teams:GetAmount(Team.Playing)
-	for _, player in ipairs(Teams:GetPlayers(Team.Playing)) do
+	local playerAmount = Game:GetAmountPlaying()
+	for _, player in ipairs(Game:GetPlaying()) do
 		Character.remove(player)
 	end
 
@@ -77,7 +85,7 @@ function Game:StartGame()
 	local takenSpots: { [string]: true } = {}
 	local gridMax = gridSize - 1 -- Coordinates starts at 0
 
-	for _, player in ipairs(Teams:GetPlayers(Team.Playing)) do
+	for _, player in ipairs(Game:GetPlaying()) do
 		if player.Parent ~= Players then
 			continue
 		end
@@ -120,7 +128,7 @@ function Game:StartGame()
 
 	task.wait(3)
 
-	for _, player in ipairs(Teams:GetPlayers(Team.Playing)) do
+	for _, player in ipairs(Game:GetPlaying()) do
 		Character.unfreeze(player)
 	end
 
@@ -128,7 +136,7 @@ function Game:StartGame()
 end
 
 function Game:EndGame()
-	for _, player in ipairs(Teams:GetPlayers(Team.Playing)) do
+	for _, player in ipairs(Game:GetPlaying()) do
 		Character.freeze(player)
 		task.defer(Character.load, player)
 
