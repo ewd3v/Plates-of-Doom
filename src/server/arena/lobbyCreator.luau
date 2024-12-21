@@ -1,5 +1,5 @@
 return function(origin: Vector3, arenaSize: number): Model
-	local lobby = Instance.new("Model")
+	local lobby = Instance.new("Folder")
 
 	local function newPart(class: string?): BasePart
 		local basePart = Instance.new(class or "Part")
@@ -89,12 +89,6 @@ return function(origin: Vector3, arenaSize: number): Model
 		makePath(origin + zOffset, 180)
 		makePath(origin + xOffset, 270)
 	end
-
-	local arenaWall = newPart()
-	arenaWall.Name = "ArenaWall"
-	arenaWall.Transparency = 1
-	arenaWall.Size = Vector3.new(arenaSize + 10, 1_000, arenaSize + 10) -- 5 * 2 = 10; 5 is the gap between arena
-	arenaWall.Position = origin
 
 	return lobby
 end

@@ -4,7 +4,7 @@ HeadMaid.Script = script
 local Assets = require("shared/assets")
 local Network = require("server/network")
 local Arena = require("server/arena")
-local Status = require("server/status")
+local Game = require("server/game")
 
 if not _G.IsGameBuild then
 	Network:SetId(game:GetService("HttpService"):GenerateGUID(false))
@@ -22,4 +22,6 @@ if not _G.IsGameBuild then
 end
 
 Arena:SetSize(100)
-Arena:ConstructLobby()
+Arena:CreateLobby()
+
+Game:Init()

@@ -32,9 +32,6 @@
     "remove_function_call_parens",
     "group_local_assignment",
 
-    "remove_assertions",
-    "remove_debug_profiling",
-
     "remove_types",
     "remove_comments",
     "remove_spaces"

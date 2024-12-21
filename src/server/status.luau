@@ -12,4 +12,6 @@ function Status:Set(text: string)
 	Network:FireAllClients("SetStatus", text)
 end
 
-return Status
+return setmetatable(Status, {
+	__call = Status.Set,
+})

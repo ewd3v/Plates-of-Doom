@@ -17,5 +17,9 @@ end
 
 local Assets = require("shared/assets")
 local UI = require("client/ui")
+local Teams = require("client/teams")
+local Arena = require("client/arena")
 
 UI:Init()
+Teams:Init()
+Arena:Init()

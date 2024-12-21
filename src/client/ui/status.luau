@@ -15,7 +15,9 @@ task.spawn(function()
 	setStatus(Network:InvokeServer("GetStatus"))
 end)
 
-return function(maid, screenGui: ScreenGui)
+local module = {}
+
+function module:Create(maid, screenGui: ScreenGui)
 	-- TODO: Actual ui
 
 	local statusHint = Instance.new("Hint")
@@ -26,3 +28,5 @@ return function(maid, screenGui: ScreenGui)
 		statusHint.Text = newStatus
 	end)
 end
+
+return module

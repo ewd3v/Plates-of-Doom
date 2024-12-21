@@ -11,7 +11,7 @@ local UI = {}
 UI.Maid = HeadMaid:Add(Maid.new())
 
 local function runModule(module: (Maid.Maid, ScreenGui) -> ())
-	task.defer(module, UI.Maid:Add(Maid.new()), UI.Maid.ScreenGui)
+	task.defer(module.Create, module, UI.Maid:Add(Maid.new()), UI.Maid.ScreenGui)
 end
 
 local function setScreenGuiProperties(screenGui: ScreenGui)
