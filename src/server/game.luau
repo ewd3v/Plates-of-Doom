@@ -132,7 +132,7 @@ function Game:StartGame()
 		Character.unfreeze(player)
 	end
 
-	task.wait(3)
+	coroutine.yield()
 end
 
 function Game:EndGame()
@@ -154,6 +154,14 @@ function Game:RunCycle()
 	Game:EndGame()
 
 	task.wait(2)
+end
+
+function Game:PlayerDied(player: Player)
+	if Network:IsConnected(player) then
+		Teams:Assign(player, Team.Lobby)
+	end
+
+	Plates:PlayerDied(player)
 end
 
 function Game:Init()
@@ -197,13 +205,14 @@ function Game:Init()
 			end
 
 			humanoid.Died:Connect(function()
-				Teams:Assign(player, Team.Lobby)
+				Game:PlayerDied(player)
 			end)
 		end)
 	end)
 
 	Game.HeadMaid.PlayerDisconnected = Network.Disconnected:Connect(function(player)
 		playerMaid[player] = nil
+		Game:PlayerDied(player)
 	end)
 end
 

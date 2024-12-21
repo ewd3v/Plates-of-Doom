@@ -7,7 +7,7 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TeamsService = game:GetService("Teams")
 
-type team = any?
+type team = any
 
 local TeamList = require("shared/team/list") :: {
 	[team]: {

@@ -3,6 +3,9 @@ local HeadMaid = require("shared/headMaid")
 local Arena = require("server/arena")
 local Character = require("server/character")
 
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+
 local Plate = {}
 type Plate = typeof(Plate.new())
 
@@ -19,7 +22,6 @@ function Plate.new(owner: Player?): Plate
 	self.Owners = { owner }
 	self.PartMaid = self.Maid:Add(Maid.new())
 	self.CFrame = CFrame.identity
-	self.Size = Vector3.zero
 
 	table.insert(Plates.List, self)
 	self.Maid:GiveTask(function()
@@ -47,10 +49,11 @@ function Plate:Reset()
 	end)
 
 	part.Anchored = true
-	part.CFrame = self.CFrame
 	part.Material = Enum.Material.SmoothPlastic
 
+	self:SetCFrame(CFrame.new(self.CFrame.Position)) -- Reset rotation
 	self:SetSize(Plates.DefaultPlateSize)
+
 	self.Maid.Part = part
 end
 
@@ -59,16 +62,34 @@ function Plate:Destroy()
 end
 
 function Plate:Kill()
-	local highlight = Instance.new("Highlight")
-	highlight.DepthMode = Enum.HighlightDepthMode.Occluded
-	highlight.FillColor = Color3.new(1, 0, 0)
-	highlight.FillTransparency = 0.5
-	highlight.OutlineColor = Color3.new(1, 0, 0)
-	highlight.OutlineTransparency = 0
-	highlight.Parent = self.Part
+	local killDuration = 15
 
-	task.delay(5, function()
+	local maid = Maid.new()
+	self.Maid.Kill = maid
+
+	local sound = maid:Add(Instance.new("Sound"))
+	sound.SoundId = "rbxassetid://8863377426" -- "rbxassetid://1034263055"
+	sound.Volume = 4
+	sound.PlaybackSpeed = Random.new():NextNumber(1.05, 1.175)
+	sound.Parent = self.Part
+	sound:Play()
+
+	local oldTransparency = self.Part.Transparency
+	self.Part.Transparency = 0.25
+
+	local tween = TweenService:Create(self.Part, TweenInfo.new(killDuration), {
+		Transparency = 1,
+	})
+	tween:Play()
+
+	maid.CancelTween = function()
+		tween:Cancel()
+		self.Part.Transparency = oldTransparency
+	end
+
+	maid.Thread = task.delay(killDuration, function()
 		self:Destroy()
+		maid:Destroy()
 	end)
 end
 
@@ -77,13 +98,12 @@ function Plate:SetCFrame(cframe: CFrame)
 	self.Part.CFrame = cframe
 end
 
-function Plate:SetSize(size: Vector3)
-	self.Size = size
-	self.Part.Size = size
-end
-
 function Plate:MoveTo(location: Vector3)
 	self:SetCFrame(CFrame.new(location) * self.CFrame.Rotation)
+end
+
+function Plate:SetSize(size: Vector3)
+	self.Part.Size = size
 end
 
 function Plate:AddSize(size: Vector3)
@@ -96,6 +116,22 @@ end
 
 function Plate:Bring(target: Character.CharacterTarget)
 	Character.teleport(target, self.CFrame.Position + Vector3.yAxis * 1, true)
+end
+
+function Plate:IsOwner(player: Player): boolean
+	return table.find(self.Owners, player) ~= nil
+end
+
+function Plate:AddOwner(player: Player)
+	if not self:IsOwner(player) then
+		table.insert(self.Owners, player)
+	end
+end
+
+function Plate:RemoveOwner(player: Player)
+	if self:IsOwner(player) then
+		table.remove(self.Owners, table.find(self.Owners, player))
+	end
 end
 
 -- @Plates
@@ -115,6 +151,19 @@ function Plates:ClearAll()
 
 	for _, plate in ipairs(list) do
 		plate:Destroy()
+	end
+end
+
+function Plates:PlayerDied(player: Player)
+	for _, plate in ipairs(Plates:GetPlates()) do
+		if not plate:IsOwner(player) then
+			continue
+		end
+
+		plate:RemoveOwner(player)
+		if #plate.Owners <= 0 then
+			plate:Kill()
+		end
 	end
 end
 
