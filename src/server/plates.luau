@@ -35,6 +35,18 @@ function Plate.new(owner: Player?): Plate
 	return self
 end
 
+function Plate:UpdateTags()
+	local part = self.Part
+	part:SetAttribute("IsPlate", true)
+
+	local userIds = {}
+	for _, player in ipairs(self.Owners) do
+		table.insert(userIds, player.UserId)
+	end
+
+	part:SetAttribute("Owners", table.concat(userIds, ","))
+end
+
 function Plate:Reset()
 	self.PartMaid:DoCleaning()
 
@@ -53,6 +65,7 @@ function Plate:Reset()
 
 	self:SetCFrame(CFrame.new(self.CFrame.Position)) -- Reset rotation
 	self:SetSize(Plates.DefaultPlateSize)
+	self:UpdateTags()
 
 	self.Maid.Part = part
 end
@@ -125,12 +138,14 @@ end
 function Plate:AddOwner(player: Player)
 	if not self:IsOwner(player) then
 		table.insert(self.Owners, player)
+		self:UpdateTags()
 	end
 end
 
 function Plate:RemoveOwner(player: Player)
 	if self:IsOwner(player) then
 		table.remove(self.Owners, table.find(self.Owners, player))
+		self:UpdateTags()
 	end
 end
 

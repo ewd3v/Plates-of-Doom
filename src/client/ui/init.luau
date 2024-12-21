@@ -33,6 +33,7 @@ function UI:Create()
 	setScreenGuiProperties(screenGui)
 
 	runModule(require("./status"))
+	runModule(require("./plateNametag"))
 
 	screenGui.Parent = playerGui
 end

@@ -132,7 +132,7 @@ function Game:StartGame()
 		Character.unfreeze(player)
 	end
 
-	coroutine.yield()
+	task.wait(1)
 end
 
 function Game:EndGame()
@@ -151,6 +151,12 @@ function Game:RunCycle()
 
 	Game:Intermission()
 	Game:StartGame()
+
+	while Game:GetAmountPlaying() > (if RunService:IsStudio() then 0 else 1) do
+		-- TODO: Events
+		task.wait(1)
+	end
+
 	Game:EndGame()
 
 	task.wait(2)
