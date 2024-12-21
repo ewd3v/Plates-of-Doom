@@ -107,7 +107,9 @@ end
 
 --@native
 local function update(dtUpdate)
-	debug.profilebegin("SchedulerUpdate")
+	if _G.IsGameBuild then
+		debug.profilebegin("SchedulerUpdate")
+	end
 
 	for _, scheduler in ipairs(scheduled) do
 		local dt = scheduler.dt
@@ -131,7 +133,9 @@ local function update(dtUpdate)
 		scheduler.dt = dt
 	end
 
-	debug.profileend()
+	if _G.IsGameBuild then
+		debug.profileend()
+	end
 end
 
 local updateLoop = RunService.Heartbeat:Connect(update)
