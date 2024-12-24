@@ -1,17 +1,11 @@
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 
+local Functions = require("shared/Functions")
+
 local mouse = Players.LocalPlayer:GetMouse()
 
 local module = {}
-
-local function getName(player: Player)
-	if player.DisplayName == player.Name then
-		return player.DisplayName
-	end
-
-	return `{player.DisplayName} (@{player.Name})`
-end
 
 function module:Create(maid, screenGui: ScreenGui)
 	local billboard = Instance.new("BillboardGui")
@@ -57,20 +51,16 @@ function module:Create(maid, screenGui: ScreenGui)
 		end)
 
 		local userIds = string.split(part:GetAttribute("Owners") or "", ",")
-		local names: { Player } = {}
+		local owners: { Player } = {}
 
 		for _, userId in ipairs(userIds) do
 			local player = Players:GetPlayerByUserId(tonumber(userId) or 0)
 			if player then
-				table.insert(names, getName(player))
+				table.insert(owners, player)
 			end
 		end
 
-		if #names == 0 then
-			textLabel.Text = "No one"
-		else
-			textLabel.Text = table.concat(names, " + ")
-		end
+		textLabel.Text = Functions.formatPlateOwnerName(owners)
 	end
 	hover(mouse.Target)
 

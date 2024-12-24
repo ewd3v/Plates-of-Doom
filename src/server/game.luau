@@ -7,6 +7,9 @@ local Team = require("shared/team")
 local Arena = require("server/arena")
 local Plates = require("server/plates")
 local Character = require("server/character")
+local Events = require("server/events")
+local EventSelector = require("server/events/selector")
+local Functions = require("shared/functions")
 
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
@@ -135,6 +138,71 @@ function Game:StartGame()
 	task.wait(1)
 end
 
+local eventContext = {}
+eventContext.__index = eventContext
+
+function eventContext:Show(name: string, instance: Instance)
+	-- 6380285152 sfx
+	table.insert(self.Names, name)
+	Status(`{self.Status} - {table.concat(self.Names, " ")}`)
+end
+
+function Game:RunEvent(possibleEvents)
+	local event = Events:Get(possibleEvents)
+	assert(event, "Unable to find an event!")
+
+	local args = table.pack(event:Init())
+
+	local status = args[1]
+	for left = 5, 0, -0.1 do
+		Status(`{status} - {math.round(left * 10) / 10}`)
+		task.wait(0.1)
+	end
+
+	local amount, selector, showSelected = event:Selector(unpack(args, 2, args.n))
+	amount = amount or 1
+	selector = selector or EventSelector.None
+	showSelected = showSelected or true
+
+	local context = setmetatable({}, eventContext)
+	context.Event = event
+	context.Status = status
+	context.Names = {}
+	context.Amount = amount
+	context.Selector = selector
+	context.ShowSelected = showSelected
+
+	for index = 1, amount do
+		context.Player = nil
+		context.Plate = nil
+
+		local random = Random.new()
+		if selector == EventSelector.Player then
+			local playing = Game:GetPlaying()
+			context.Player = playing[random:NextInteger(1, #playing)]
+		elseif selector == EventSelector.Plate then
+			local plates = Plates:GetPlates()
+			context.Plate = plates[random:NextInteger(1, #plates)]
+		end
+
+		event:Run(context, unpack(args, 2, args.n))
+
+		if showSelected then
+			if selector == EventSelector.Player then
+				context:Show(Functions.formatPlayerName(context.Player), context.Player.Character)
+			elseif selector == EventSelector.Plate then
+				context:Show(Functions.formatPlateOwnerName(context.Plate.Owners), context.Plate.Part)
+			end
+		end
+
+		if index ~= amount then
+			task.wait(1)
+		end
+	end
+
+	task.wait(3)
+end
+
 function Game:EndGame()
 	for _, player in ipairs(Game:GetPlaying()) do
 		Character.freeze(player)
@@ -152,9 +220,9 @@ function Game:RunCycle()
 	Game:Intermission()
 	Game:StartGame()
 
+	local possibleEvents = Events:GetPossible(Game)
 	while Game:GetAmountPlaying() > (if RunService:IsStudio() then 0 else 1) do
-		-- TODO: Events
-		task.wait(1)
+		Game:RunEvent(possibleEvents)
 	end
 
 	Game:EndGame()
