@@ -811,6 +811,34 @@ return table.freeze({
 
 	{
 		1,
+		"1 plate will become an elevator",
+		{ 1, Selector.Plate },
+		function(context)
+			local plate = context.Plate
+
+			local maid = Maid.new()
+			plate.PartMaid.Elevator = maid
+
+			maid.Thead = task.defer(function()
+				local move = 20
+				local cooldown = 3
+				local duration = move / Plates.MovePerSecond
+
+				plate.Move += Vector3.yAxis * move / 2
+				task.wait(duration / 2 + cooldown)
+
+				while true do
+					plate.Move -= Vector3.yAxis * move
+					task.wait(duration + cooldown)
+
+					plate.Move += Vector3.yAxis * move
+					task.wait(duration + cooldown)
+				end
+			end)
+		end,
+	},
+	{
+		1,
 		"1 plate will be given controls",
 		{ 1, Selector.Plate },
 		function(context)
@@ -860,7 +888,8 @@ return table.freeze({
 						return
 					end
 
-					task.delay(2.5, function()
+					local duration = 2
+					task.delay(duration + 0.5, function()
 						db = false
 						control.Color = activeColor
 						clickDetector.MaxActivationDistance = range
@@ -871,7 +900,9 @@ return table.freeze({
 					clickDetector.MaxActivationDistance = 0
 
 					plate:CFrameTo(
-						CFrame.new(plate:GetMoveTarget()) * plate.CFrame.Rotation * CFrame.new(dir * 2.5 * 2)
+						CFrame.new(plate:GetMoveTarget())
+							* plate.CFrame.Rotation
+							* CFrame.new(dir * Plates.MovePerSecond * duration)
 					)
 				end)
 			end

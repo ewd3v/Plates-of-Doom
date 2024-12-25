@@ -111,9 +111,6 @@ function Plate:Reset(clone: MeshPart?)
 		part.CanCollide = aboveMinSize >= 2
 	end))
 
-	local movePerSecond = 2.5
-	local rotatePerSecond = 20
-	local sizePerSecond = 3
 	self.PartMaid:GiveTask(RunService.Heartbeat:Connect(function(dt)
 		part.AssemblyLinearVelocity = Vector3.zero
 		part.AssemblyAngularVelocity = Vector3.zero
@@ -121,7 +118,7 @@ function Plate:Reset(clone: MeshPart?)
 		if self.Move ~= Vector3.zero then
 			local move: Vector3
 
-			local dtMove = movePerSecond * dt
+			local dtMove = Plates.MovePerSecond * dt
 			if self.Move.Magnitude < dtMove then
 				move = self.Move
 				self.Move = Vector3.zero
@@ -137,7 +134,7 @@ function Plate:Reset(clone: MeshPart?)
 		if self.Rotate ~= Vector3.zero then
 			local rotate: Vector3
 
-			local dtRotate = rotatePerSecond * dt
+			local dtRotate = Plates.RotatePerSecond * dt
 			if self.Rotate.Magnitude < dtRotate then
 				rotate = self.Rotate
 				self.Rotate = Vector3.zero
@@ -153,7 +150,7 @@ function Plate:Reset(clone: MeshPart?)
 		if self.SizeChange ~= Vector3.zero then
 			local size: Vector3
 
-			local dtSize = sizePerSecond * dt
+			local dtSize = Plates.SizePerSecond * dt
 			if self.SizeChange.Magnitude < dtSize then
 				size = self.SizeChange
 				self.SizeChange = Vector3.zero
@@ -334,6 +331,9 @@ Plates.DefaultPlateSize = Vector3.new(20, 1, 20)
 Plates.List = {} :: { Plate }
 Plates.new = Plate.new
 Plates.from = Plate.from
+Plates.MovePerSecond = 2.5
+Plates.RotatePerSecond = 20
+Plates.SizePerSecond = 3
 
 function Plates:GetPlates()
 	return Plates.List
