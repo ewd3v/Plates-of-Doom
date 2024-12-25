@@ -16,6 +16,8 @@ function Event:RunFunc(index: number, ...)
 		return value(...)
 	elseif type(value) == "table" then
 		return unpack(value)
+	else
+		return value
 	end
 end
 
@@ -53,7 +55,7 @@ function Events:Get(possible: table): typeof(Event.new())?
 	for _, data in ipairs(possible) do
 		weightCounter += data[1]
 
-		if weightCounter <= targetWeight then
+		if weightCounter >= targetWeight then
 			return Event.new(data)
 		end
 	end

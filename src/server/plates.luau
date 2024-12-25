@@ -7,7 +7,7 @@ local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 
 local Plate = {}
-type Plate = typeof(Plate.new())
+export type Plate = typeof(Plate.new())
 
 local Plates = {}
 
@@ -16,12 +16,17 @@ local Plates = {}
 -- @Plate
 Plate.__index = Plate
 
-function Plate.new(owner: Player?): Plate
+function Plate.new(owner: (Player | { Player })?): Plate
 	local self = setmetatable({}, Plate)
 	self.Maid = Maid.new()
-	self.Owners = { owner }
+	self.Owners = if type(owner) == "table" then owner else { owner }
 	self.PartMaid = self.Maid:Add(Maid.new())
 	self.CFrame = CFrame.identity
+	self.Move = Vector3.zero
+	self.Rotate = Vector3.zero
+	self.SizeChange = Vector3.zero
+	self.LinearVelocity = Vector3.zero
+	self.AngularVelocity = Vector3.zero
 
 	table.insert(Plates.List, self)
 	self.Maid:GiveTask(function()
@@ -32,6 +37,17 @@ function Plate.new(owner: Player?): Plate
 	end)
 
 	self:Reset()
+	return self
+end
+
+function Plate:Destroy()
+	self.Maid:Destroy()
+end
+
+function Plate.from(plate: Plate): Plate
+	local self = Plate.new(plate.Owners)
+	self:Reset(plate.Part)
+
 	return self
 end
 
@@ -47,10 +63,16 @@ function Plate:UpdateTags()
 	part:SetAttribute("Owners", table.concat(userIds, ","))
 end
 
-function Plate:Reset()
+function Plate:Reset(clone: Part?)
 	self.PartMaid:DoCleaning()
 
-	local part = Instance.new("Part")
+	self.Move = Vector3.zero
+	self.Rotate = Vector3.zero
+	self.SizeChange = Vector3.zero
+	self.LinearVelocity = Vector3.zero
+	self.AngularVelocity = Vector3.zero
+
+	local part = if clone then Instance.fromExisting(clone) else Instance.new("Part")
 	part.Parent = assert(Arena.Folder, "No Arena exists yet.")
 
 	self.Part = part
@@ -60,18 +82,92 @@ function Plate:Reset()
 		end
 	end)
 
-	part.Anchored = true
-	part.Material = Enum.Material.SmoothPlastic
+	local minSize = 0.0011 -- Basically what you get if you set the size of a part to zero (i.e minimum size of parts), plus a little more to account for rounding errors
+	self.PartMaid:GiveTask(part:GetPropertyChangedSignal("Size"):Connect(function()
+		local aboveMinSize = 0
 
-	self:SetCFrame(CFrame.new(self.CFrame.Position)) -- Reset rotation
-	self:SetSize(Plates.DefaultPlateSize)
+		if part.Size.X > minSize then
+			aboveMinSize += 1
+		end
+		if part.Size.Y > minSize then
+			aboveMinSize += 1
+		end
+		if part.Size.Z > minSize then
+			aboveMinSize += 1
+		end
+
+		-- Part is collidable if at least 2 axis are above min size
+		part.CanCollide = aboveMinSize >= 2
+	end))
+
+	local movePerSecond = 2
+	local rotatePerSecond = 20
+	local sizePerSecond = 2
+	self.PartMaid:GiveTask(RunService.Heartbeat:Connect(function(dt)
+		part.AssemblyLinearVelocity = Vector3.zero
+		part.AssemblyAngularVelocity = Vector3.zero
+
+		if self.Move ~= Vector3.zero then
+			local move: Vector3
+
+			local dtMove = movePerSecond * dt
+			if self.Move.Magnitude < dtMove then
+				move = self.Move
+				self.Move = Vector3.zero
+			else
+				move = self.Move.Unit * dtMove
+				self.Move -= move
+			end
+
+			part.Position += move
+			--part.AssemblyLinearVelocity += move -- TODO: Fix?
+		end
+
+		if self.Rotate ~= Vector3.zero then
+			local rotate: Vector3
+
+			local dtRotate = rotatePerSecond * dt
+			if self.Rotate.Magnitude < dtRotate then
+				rotate = self.Rotate
+				self.Rotate = Vector3.zero
+			else
+				rotate = self.Rotate.Unit * dtRotate
+				self.Rotate -= rotate
+			end
+
+			part.Rotation += rotate
+			--part.AssemblyAngularVelocity += rotate -- TODO: Fix?
+		end
+
+		if self.SizeChange ~= Vector3.zero then
+			local size: Vector3
+
+			local dtSize = sizePerSecond * dt
+			if self.SizeChange.Magnitude < dtSize then
+				size = self.SizeChange
+				self.SizeChange = Vector3.zero
+			else
+				size = self.SizeChange.Unit * dtSize
+				self.SizeChange -= size
+			end
+
+			part.Size += size
+		end
+
+		self.CFrame = part.CFrame
+
+		part.AssemblyLinearVelocity += self.LinearVelocity
+		part.AssemblyAngularVelocity += self.AngularVelocity
+	end))
+
+	if not clone then
+		part.Anchored = true
+		part.Material = Enum.Material.SmoothPlastic
+		self:SetSize(Plates.DefaultPlateSize)
+	end
+
 	self:UpdateTags()
-
 	self.Maid.Part = part
-end
-
-function Plate:Destroy()
-	self.Maid:Destroy()
 end
 
 function Plate:Kill()
@@ -111,8 +207,47 @@ function Plate:SetCFrame(cframe: CFrame)
 	self.Part.CFrame = cframe
 end
 
-function Plate:MoveTo(location: Vector3)
-	self:SetCFrame(CFrame.new(location) * self.CFrame.Rotation)
+function Plate:SetPosition(position: Vector3)
+	self:SetCFrame(CFrame.new(position) * self.CFrame.Rotation)
+end
+
+function Plate:GetMoveTarget(): Vector3
+	return self.Part.Position + self.Move
+end
+
+function Plate:GetRotateTarget(): Vector3
+	return self.Part.Rotation + self.Rotate
+end
+
+function Plate:GetCFrameTarget(): CFrame
+	local targetPosition = self:GetMoveTarget()
+	local targetRotation = self:GetRotateTarget()
+	return CFrame.new(targetPosition)
+		* CFrame.fromOrientation(math.rad(targetRotation.X), math.rad(targetRotation.Y), math.rad(targetRotation.Z))
+end
+
+function Plate:GetSizeTarget(): Vector3
+	return self.Part.Size + self.SizeChange
+end
+
+function Plate:MoveTo(position: Vector3)
+	self.Move = position - self.Part.Position
+end
+
+function Plate:RotateTo(rotation: Vector3)
+	self.Rotate = rotation - self.Part.Rotation
+end
+
+function Plate:CFrameTo(cframe: CFrame)
+	local rx, ry, rz = cframe:ToOrientation()
+	local x, y, z = math.deg(rx), math.deg(ry), math.deg(rz)
+
+	self:MoveTo(cframe.Position)
+	self:RotateTo(Vector3.new(x, y, z))
+end
+
+function Plate:SizeTo(size: Vector3)
+	self.SizeChange = size - self.Part.Size
 end
 
 function Plate:SetSize(size: Vector3)
@@ -120,11 +255,19 @@ function Plate:SetSize(size: Vector3)
 end
 
 function Plate:AddSize(size: Vector3)
-	self:SetSize(self.Size + size)
+	self:SizeTo(self.Part.Size + size)
 end
 
 function Plate:RemoveSize(size: Vector3)
-	self:SetSize(self.Size - size)
+	self:SizeTo(self.Part.Size - size)
+end
+
+function Plate:Grow(amount: number)
+	return self:AddSize(Vector3.new(amount, 0, amount))
+end
+
+function Plate:Shrink(amount: number)
+	return self:RemoveSize(Vector3.new(amount, 0, amount))
 end
 
 function Plate:Bring(target: Character.CharacterTarget)
@@ -155,6 +298,7 @@ end
 Plates.DefaultPlateSize = Vector3.new(20, 1, 20)
 Plates.List = {} :: { Plate }
 Plates.new = Plate.new
+Plates.from = Plate.from
 
 function Plates:GetPlates()
 	return Plates.List

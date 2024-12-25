@@ -53,6 +53,13 @@ function Character.getHumanoid(target: CharacterTarget): Humanoid?
 	end
 end
 
+function Character.getCFrame(target: CharacterTarget): CFrame?
+	local root = Character.getRoot(target)
+	if root then
+		return root.CFrame
+	end
+end
+
 function Character.teleport(
 	target: CharacterTarget,
 	location: CFrame | Vector3 | CharacterTarget | Instance,
@@ -127,6 +134,19 @@ end
 
 function Character.load(player: Player)
 	return pcall(player.LoadCharacter, player)
+end
+
+function Character.refresh(player: Player)
+	local cframe = Character.getCFrame(player)
+	while not Character.load(player) do
+		task.wait()
+	end
+
+	while not Character.getRoot(player) or not player.Character:IsDescendantOf(workspace) do
+		task.wait()
+	end
+
+	Character.teleport(player, cframe)
 end
 
 function Character.kill(target: CharacterTarget)

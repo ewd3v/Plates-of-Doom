@@ -109,7 +109,7 @@ function Game:StartGame()
 		end
 
 		local plate = Plates.new(player)
-		plate:MoveTo(Arena.Origin + Vector3.new(x - gridMax / 2, 0, z - gridMax / 2) * (plateSize + gap))
+		plate:SetPosition(Arena.Origin + Vector3.new(x - gridMax / 2, 0, z - gridMax / 2) * (plateSize + gap))
 
 		while not Character.load(player) do
 			task.wait()
@@ -139,12 +139,34 @@ function Game:StartGame()
 end
 
 local eventContext = {}
+eventContext.Maid = HeadMaid:Add(Maid.new())
 eventContext.__index = eventContext
 
 function eventContext:Show(name: string, instance: Instance)
 	-- 6380285152 sfx
 	table.insert(self.Names, name)
 	Status(`{self.Status} - {table.concat(self.Names, " ")}`)
+
+	self:Highlight(instance)
+end
+
+function eventContext:Highlight(instance: Instance)
+	local highlight = Instance.new("Highlight")
+	highlight.FillColor = Color3.new(0, 0, 1)
+	highlight.FillTransparency = 0.5
+	highlight.OutlineColor = Color3.new(1, 1, 1)
+	highlight.OutlineTransparency = 0
+	highlight.Parent = instance
+
+	task.delay(0.75, game.Destroy, highlight)
+end
+
+function eventContext:ShowPlayer(player: Player)
+	self:Show(Functions.formatPlayerName(player), player.Character)
+end
+
+function eventContext:ShowPlate(plate)
+	return self:Show(Functions.formatPlateOwnerName(plate.Owners), plate.Part)
 end
 
 function Game:RunEvent(possibleEvents)
@@ -159,10 +181,11 @@ function Game:RunEvent(possibleEvents)
 		task.wait(0.1)
 	end
 
-	local amount, selector, showSelected = event:Selector(unpack(args, 2, args.n))
+	local amount, selector, showSelected, combineSelected = event:Selector(unpack(args, 2, args.n))
 	amount = amount or 1
 	selector = selector or EventSelector.None
-	showSelected = showSelected or true
+	showSelected = if showSelected ~= nil then showSelected else true
+	combineSelected = combineSelected or false
 
 	local context = setmetatable({}, eventContext)
 	context.Event = event
@@ -171,6 +194,9 @@ function Game:RunEvent(possibleEvents)
 	context.Amount = amount
 	context.Selector = selector
 	context.ShowSelected = showSelected
+	context.CombineSelected = combineSelected
+	context.Players = {}
+	context.Plates = {}
 
 	for index = 1, amount do
 		context.Player = nil
@@ -180,23 +206,44 @@ function Game:RunEvent(possibleEvents)
 		if selector == EventSelector.Player then
 			local playing = Game:GetPlaying()
 			context.Player = playing[random:NextInteger(1, #playing)]
+			table.insert(context.Players, context.Player)
 		elseif selector == EventSelector.Plate then
 			local plates = Plates:GetPlates()
 			context.Plate = plates[random:NextInteger(1, #plates)]
+			table.insert(context.Plates, context.Plate)
 		end
+
+		if not combineSelected then
+			event:Run(context, unpack(args, 2, args.n))
+
+			if showSelected then
+				if selector == EventSelector.Player then
+					context:ShowPlayer(context.Player)
+				elseif selector == EventSelector.Plate then
+					context:ShowPlate(context.Plate)
+				end
+			end
+
+			if index ~= amount then
+				task.wait(1)
+			end
+		end
+	end
+
+	if combineSelected then
+		context.Player = nil
+		context.Plate = nil
 
 		event:Run(context, unpack(args, 2, args.n))
 
 		if showSelected then
-			if selector == EventSelector.Player then
-				context:Show(Functions.formatPlayerName(context.Player), context.Player.Character)
-			elseif selector == EventSelector.Plate then
-				context:Show(Functions.formatPlateOwnerName(context.Plate.Owners), context.Plate.Part)
+			for _, player in ipairs(context.Players) do
+				context:ShowPlayer(player)
 			end
-		end
 
-		if index ~= amount then
-			task.wait(1)
+			for _, plate in ipairs(context.Plates) do
+				context:ShowPlate(plate)
+			end
 		end
 	end
 
@@ -213,6 +260,8 @@ function Game:EndGame()
 end
 
 function Game:RunCycle()
+	eventContext.Maid:DoCleaning()
+
 	assignAllTeam(Team.Lobby)
 	Plates:ClearAll()
 	Arena:Remove()
