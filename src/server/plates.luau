@@ -74,6 +74,7 @@ function Plate:Reset(clone: Part?)
 
 	local part = if clone then Instance.fromExisting(clone) else Instance.new("Part")
 	part.Anchored = true
+	part.CFrame = self.CFrame
 	part.Parent = assert(Arena.Folder, "No Arena exists yet.")
 
 	self.Part = part

@@ -28,7 +28,7 @@ return table.freeze({
 	{
 		1,
 		function()
-			local targets = random:NextInteger(1, 3)
+			local targets = random:NextInteger(1, 2)
 
 			return `{targets} plate(s) will return to normal`, targets
 		end,
@@ -220,10 +220,16 @@ return table.freeze({
 			if #plate.Owners > 1 then
 				local owners = plate.Owners
 				local transferAmount = math.floor(#owners / 2)
+
+				-- Remove half of all players from the main plate
 				for _ = 1, transferAmount do
 					local owner = owners[#owners]
 					plate:RemoveOwner(owner)
-					half:AddOwner(owner)
+				end
+
+				-- Then remove the remaining players of the main plate from the half
+				for _, owner in ipairs(plate.Owners) do
+					half:RemoveOwner(owner)
 				end
 			end
 
