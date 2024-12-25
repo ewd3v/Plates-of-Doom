@@ -369,7 +369,7 @@ function Game:Init()
 			local spawnLocations = {}
 			for _, child in ipairs(lobby:GetChildren()) do
 				if child.Name == "SpawnLocation" then
-					table.insert(child, spawnLocations)
+					table.insert(spawnLocations, child)
 				end
 			end
 

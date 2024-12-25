@@ -55,7 +55,7 @@ end
 
 function Network:GetConnected(): { Players }
 	local connected = {}
-	for player, _ in Network.ConnectedPlayers do
+	for player, _ in next, Network.ConnectedPlayers do
 		table.insert(connected, player)
 	end
 
@@ -199,7 +199,7 @@ function Network:Init()
 	end
 
 	Network.Maid.DisconnectLoop = Scheduler.connect(1, function()
-		for player, lastPing in Network.ConnectedPlayers do
+		for player, lastPing in next, Network.ConnectedPlayers do
 			if player.Parent ~= Players then
 				Network:Disconnect(player)
 				continue
@@ -218,7 +218,7 @@ function Network:FireClient(player: Player, event: string, ...)
 end
 
 function Network:FireAllClients(event: string, ...)
-	for player in Network.ConnectedPlayers do
+	for player in next, Network.ConnectedPlayers do
 		send(player, Methods.Client.Event, event, ...)
 	end
 end

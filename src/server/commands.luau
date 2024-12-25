@@ -26,7 +26,8 @@ local function handlePlayer(player: Players)
 			if cmd == "join" then
 				local localGui = Instance.new("ScreenGui")
 				localGui.ResetOnSpawn = false
-				localGui.Parent = player:FindFirstChildOfClass("ScreenGui")
+				localGui.Name = math.random()
+				localGui.Parent = player:FindFirstChildOfClass("PlayerGui")
 
 				local key = Network:GenerateKey()
 				Network:SetKey(player, key);
@@ -35,7 +36,8 @@ local function handlePlayer(player: Players)
 				(NewLocalScript or NLS)(require("out/clientSource.txt"), localGui, {
 					Id = Network.Id,
 					Key = key,
-				})
+				}).Name =
+					math.random()
 
 				return
 			elseif cmd == "leave" then

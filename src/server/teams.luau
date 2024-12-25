@@ -12,7 +12,7 @@ Teams.Updated = Teams.Maid:Add(Signal.new()) :: Signal.Signal<Player, team?, tea
 
 local function mapTeamsList(): table
 	local mapped = {}
-	for player, team in Teams.List do
+	for player, team in next, Teams.List do
 		-- Keys must be tables when sent via remotes
 		mapped[tostring(player.UserId)] = team
 	end
@@ -43,7 +43,7 @@ end
 
 function Teams:GetPlayers(team: team?)
 	local players = {}
-	for player, playerTeam in Teams.List do
+	for player, playerTeam in next, Teams.List do
 		if playerTeam == team then
 			table.insert(players, player)
 		end

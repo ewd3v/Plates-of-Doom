@@ -299,7 +299,7 @@ function Signal:DisconnectAll()
 
 	local yieldedThreads = rawget(self, "_yieldedThreads")
 	if yieldedThreads then
-		for thread in yieldedThreads do
+		for thread in next, yieldedThreads do
 			if coroutine.status(thread) == "suspended" then
 				warn(debug.traceback(thread, "signal disconnected; yielded thread cancelled", 2))
 				task.cancel(thread)

@@ -25,7 +25,7 @@ Teams.List = {} :: { [Player]: team }
 function Teams:Update(list: { [Player]: team })
 	table.clear(Teams.List)
 
-	for userId, team in list do
+	for userId, team in next, list do
 		local player = Players:GetPlayerByUserId(tonumber(userId))
 		if not player then
 			continue
@@ -54,11 +54,11 @@ end
 function Teams:Init()
 	Teams.Maid.RenderStepped = RunService.RenderStepped:Connect(function()
 		local amounts: { [team]: number } = {}
-		for _, teamId in Teams.List do
+		for _, teamId in next, Teams.List do
 			amounts[teamId] = (amounts[teamId] or 0) + 1
 		end
 
-		for teamId, data in TeamList do
+		for teamId, data in next, TeamList do
 			local team = Teams.TeamMaid[teamId]
 			if not team or team.Parent ~= TeamsService then
 				team = Instance.new("Team")
@@ -71,7 +71,7 @@ function Teams:Init()
 			team.Parent = TeamsService
 		end
 
-		for player, teamId in Teams.List do
+		for player, teamId in next, Teams.List do
 			local team = Teams.TeamMaid[teamId]
 
 			if player == Players.LocalPlayer and team ~= player.Team then
