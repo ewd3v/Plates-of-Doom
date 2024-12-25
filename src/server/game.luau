@@ -223,10 +223,18 @@ function Game:RunEvent(possibleEvents)
 		local random = Random.new()
 		if selector == EventSelector.Player then
 			local playing = Game:GetPlaying()
+			if #playing < 1 then
+				break
+			end
+
 			context.Player = playing[random:NextInteger(1, #playing)]
 			table.insert(context.Players, context.Player)
 		elseif selector == EventSelector.Plate then
 			local plates = Plates:GetPlates()
+			if #plates < 1 then
+				break
+			end
+
 			context.Plate = plates[random:NextInteger(1, #plates)]
 			table.insert(context.Plates, context.Plate)
 		end

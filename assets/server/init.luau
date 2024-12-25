@@ -36,7 +36,23 @@ do
 
 	add("Block", meshFolder, insertMesh("rbxassetid://13307406342"))
 	add("Ball", meshFolder, insertMesh("rbxassetid://11640745670"))
-    add("Cylinder", meshFolder, insertMesh("rbxassetid://18406029582"))
+	add("Cylinder", meshFolder, insertMesh("rbxassetid://18406029582"))
+end
+
+do
+	local lifeLinkBeam = add("LifeLinkBeam", assets, Instance.new("Beam")) :: Beam
+	lifeLinkBeam.Color = ColorSequence.new(Color3.new(0, 1, 0))
+	lifeLinkBeam.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 1),
+		NumberSequenceKeypoint.new(0.1, 0.75),
+		NumberSequenceKeypoint.new(0.2, 0.75),
+		NumberSequenceKeypoint.new(0.3, 0.4),
+		NumberSequenceKeypoint.new(0.7, 0.4),
+		NumberSequenceKeypoint.new(0.8, 0.75),
+		NumberSequenceKeypoint.new(0.9, 0.75),
+		NumberSequenceKeypoint.new(1, 1),
+	})
+	lifeLinkBeam.FaceCamera = true
 end
 
 return assets

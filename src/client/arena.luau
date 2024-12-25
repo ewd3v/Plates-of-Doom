@@ -14,7 +14,8 @@ function Arena:CreateWalls()
 	local maid = Maid.new()
 	Arena.Maid.Walls = maid
 
-	local height = 1_000
+	local maxPartSize = 2048
+	local height = maxPartSize
 	local function createWall(position: Vector3?, size: Vector3): Part
 		local wall = maid:Add(Instance.new("Part")) :: Part
 		wall.Anchored = true
@@ -39,7 +40,7 @@ function Arena:CreateWalls()
 	if currentTeam == Team.Lobby then
 		createWall(origin, Vector3.new(size + 10, height, size + 10)) -- 5 * 2 = 10; 5 is the gap between arena
 	elseif currentTeam == Team.Playing then
-		local width = 100 -- Width of walls
+		local width = maxPartSize / 3 -- Width of walls
 
 		local offset = size / 2 + width / 2
 		local xOffset = Vector3.xAxis * offset

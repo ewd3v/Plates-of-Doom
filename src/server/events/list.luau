@@ -6,6 +6,7 @@ local Maid = require("shared/maid")
 local Scheduler = require("shared/scheduler")
 local Teams = require("server/teams")
 local Team = require("shared/team")
+local Assets = require("shared/assets")
 
 local Selector = require("./selector")
 
@@ -99,7 +100,7 @@ return table.freeze({
 	},
 
 	{
-		1,
+		1.5,
 		function()
 			local targets = random:NextInteger(1, 3)
 			local amount = random:NextInteger(2, 6)
@@ -114,7 +115,7 @@ return table.freeze({
 		end,
 	},
 	{
-		1,
+		2,
 		function()
 			local targets = random:NextInteger(1, 3)
 			local amount = random:NextInteger(2, 6)
@@ -294,7 +295,7 @@ return table.freeze({
 		end,
 	},
 	{
-		1,
+		1.5,
 		"2 plates will merge together",
 		nil,
 		function(context)
@@ -651,6 +652,27 @@ return table.freeze({
 
 	{
 		1,
+		function()
+			local targets = random:NextInteger(1, 2)
+
+			return `{targets} players(s) will teleport to a random plate`, targets
+		end,
+		function(targets: number)
+			return targets, Selector.Player
+		end,
+		function(context)
+			local availablePlates = Plates:GetPlates()
+			if #availablePlates < 1 then
+				return
+			end
+
+			local plate = availablePlates[random:NextInteger(1, #availablePlates)]
+			plate:Bring(context.Player)
+		end,
+	},
+
+	{
+		1,
 		"2 plates will swap position",
 		nil,
 		function(context)
@@ -724,6 +746,67 @@ return table.freeze({
 			if humanoid then
 				humanoid.WalkSpeed -= amount
 			end
+		end,
+	},
+
+	{
+		1,
+		function()
+			local targets = random:NextInteger(1, 2)
+			local minutes = random:NextInteger(1, 2)
+
+			return `{targets} player(s) will gain a forcefield for {minutes} minute(s)`, targets, minutes
+		end,
+		function(targets: number)
+			return targets, Selector.Player
+		end,
+		function(context, _, minutes: number)
+			local forceField = Instance.new("ForceField")
+			forceField.Parent = context.Player.Character
+
+			task.delay(minutes * 60, game.Destroy, forceField)
+		end,
+	},
+	{
+		1,
+		"2 players lives will becomed linked",
+		nil,
+		function(context)
+			local player1, player2 = get2RandomPlayers()
+			if not player1 or not player2 then
+				return
+			end
+
+			local character1 = Character.get(player1)
+			local character2 = Character.get(player2)
+
+			local humanoid1 = Character.getHumanoid(character1)
+			local humanoid2 = Character.getHumanoid(character2)
+
+			humanoid1.Died:Once(function()
+				task.defer(Character.kill, character2)
+			end)
+
+			humanoid2.Died:Once(function()
+				task.defer(Character.kill, character1)
+			end)
+
+			context:ShowPlayer(player1)
+			context:ShowPlayer(player2)
+
+			local part1 = Character.getPart(character1)
+			local part2 = Character.getPart(character2)
+
+			local attachment1 = Instance.new("Attachment")
+			attachment1.Parent = part1
+
+			local attachment2 = Instance.new("Attachment")
+			attachment2.Parent = part2
+
+			local beam = Assets.Server.LifeLinkBeam:Clone() :: Beam
+			beam.Attachment0 = attachment1
+			beam.Attachment1 = attachment2
+			beam.Parent = part1
 		end,
 	},
 })
