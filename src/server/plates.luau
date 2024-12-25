@@ -48,7 +48,7 @@ function Plate:Destroy()
 end
 
 function Plate.from(plate: Plate): Plate
-	local self = Plate.new(plate.Owners)
+	local self = Plate.new(table.clone(plate.Owners))
 	self:Reset(plate.Part)
 
 	return self

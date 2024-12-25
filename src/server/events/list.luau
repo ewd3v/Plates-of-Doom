@@ -267,7 +267,7 @@ return table.freeze({
 
 				-- Remove half of all players from the main plate
 				for _ = 1, transferAmount do
-					local owner = owners[#owners]
+					local owner = owners[random:NextInteger(1, #owners)]
 					plate:RemoveOwner(owner)
 				end
 
@@ -810,7 +810,7 @@ return table.freeze({
 	},
 
 	{
-		991,
+		1,
 		function()
 			local targets = random:NextInteger(1, 1)
 			return `{targets} player(s) will recieve a ball and chain`, targets
