@@ -331,6 +331,11 @@ return table.freeze({
 				plate1.AngularVelocity = plate1.AngularVelocity:Lerp(plate2.AngularVelocity, 0.5)
 				part1.Color = part1.Color:Lerp(part2.Color, 0.5)
 
+				-- If both parts don't match in shape, then it's safest to just make it a block
+				if plate1:GetShape() ~= plate2:GetShape() then
+					plate1:SetShape(Enum.PartType.Block)
+				end
+
 				plate2:Destroy()
 			end
 
@@ -519,6 +524,61 @@ return table.freeze({
 				math.max(context.Plate.LinearVelocity.Y, power),
 				context.Plate.LinearVelocity.Z
 			)
+		end,
+	},
+
+	{
+		991,
+		function()
+			local targets = random:NextInteger(1, 2)
+
+			return `{targets} plate(s) will become a cube`, targets
+		end,
+		function(targets: number)
+			return targets, Selector.Plate
+		end,
+		function(context)
+			local size = context.Plate:GetSizeTarget()
+			local maxSize = math.max(size.X, size.Y, size.Z)
+
+			context.Plate:SizeTo(Vector3.one * maxSize)
+			context.Plate:SetShape(Enum.PartType.Block)
+		end,
+	},
+	{
+		1,
+		function()
+			local targets = random:NextInteger(1, 2)
+
+			return `{targets} plate(s) will become a sphere`, targets
+		end,
+		function(targets: number)
+			return targets, Selector.Plate
+		end,
+		function(context)
+			local size = context.Plate:GetSizeTarget()
+			local maxSize = math.max(size.X, size.Y, size.Z)
+
+			context.Plate:SizeTo(Vector3.one * maxSize)
+			context.Plate:SetShape(Enum.PartType.Ball)
+		end,
+	},
+	{
+		991,
+		function()
+			local targets = random:NextInteger(1, 2)
+
+			return `{targets} plate(s) will become a cylinder`, targets
+		end,
+		function(targets: number)
+			return targets, Selector.Plate
+		end,
+		function(context)
+			local size = context.Plate:GetSizeTarget()
+			local maxSize = math.max(size.X, size.Z)
+
+			context.Plate:SizeTo(Vector3.new(maxSize, size.Y, maxSize))
+			context.Plate:SetShape(Enum.PartType.Cylinder)
 		end,
 	},
 

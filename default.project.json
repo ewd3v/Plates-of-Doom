@@ -3,26 +3,6 @@
   "tree": {
     "$className": "DataModel",
 
-    "ReplicatedStorage": {
-      "Assets": {
-        "$className": "Folder",
-
-        "Client": {
-          "$path": "assets/client"
-        },
-
-        "Shared": {
-          "$path": "assets/shared"
-        }
-      }
-    },
-
-    "ServerStorage": {
-      "Assets": {
-        "$path": "assets/server"
-      }
-    },
-
     "ServerScriptService": {
       "Server": {
         "$path": "out/server.server.luau"

@@ -2,12 +2,14 @@ local Maid = require("shared/maid")
 local HeadMaid = require("shared/headMaid")
 local Arena = require("server/arena")
 local Character = require("server/character")
+local Assets = require("shared/assets")
 
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 
 local Plate = {}
 export type Plate = typeof(Plate.new())
+export type PlatePart = MeshPart
 
 local Plates = {}
 
@@ -20,6 +22,7 @@ function Plate.new(owner: (Player | { Player })?): Plate
 	local self = setmetatable({}, Plate)
 	self.Maid = Maid.new()
 	self.Owners = if type(owner) == "table" then owner else { owner }
+	self.Part = nil :: PlatePart?
 	self.PartMaid = self.Maid:Add(Maid.new())
 	self.CFrame = CFrame.identity
 	self.Move = Vector3.zero
@@ -63,7 +66,7 @@ function Plate:UpdateTags()
 	part:SetAttribute("Owners", table.concat(userIds, ","))
 end
 
-function Plate:Reset(clone: Part?)
+function Plate:Reset(clone: MeshPart?)
 	self.PartMaid:DoCleaning()
 
 	self.Move = Vector3.zero
@@ -72,12 +75,18 @@ function Plate:Reset(clone: Part?)
 	self.LinearVelocity = Vector3.zero
 	self.AngularVelocity = Vector3.zero
 
-	local part = if clone then Instance.fromExisting(clone) else Instance.new("Part")
+	local part = Instance.fromExisting(clone or Assets.Server.PlateMesh.Block)
+	part.Name = "Plate"
 	part.Anchored = true
 	part.CFrame = self.CFrame
 	part.Parent = assert(Arena.Folder, "No Arena exists yet.")
 
 	self.Part = part
+	if not clone then
+		part.Material = Enum.Material.SmoothPlastic
+		self:SetSize(Plates.DefaultPlateSize)
+	end
+
 	self.Maid.Removing = part.AncestryChanged:Connect(function()
 		if not part:IsDescendantOf(Arena.Folder) then
 			self:Destroy()
@@ -102,9 +111,9 @@ function Plate:Reset(clone: Part?)
 		part.CanCollide = aboveMinSize >= 2
 	end))
 
-	local movePerSecond = 2
+	local movePerSecond = 2.5
 	local rotatePerSecond = 20
-	local sizePerSecond = 2
+	local sizePerSecond = 3
 	self.PartMaid:GiveTask(RunService.Heartbeat:Connect(function(dt)
 		part.AssemblyLinearVelocity = Vector3.zero
 		part.AssemblyAngularVelocity = Vector3.zero
@@ -161,11 +170,6 @@ function Plate:Reset(clone: Part?)
 		part.AssemblyLinearVelocity += self.LinearVelocity
 		part.AssemblyAngularVelocity += self.AngularVelocity
 	end))
-
-	if not clone then
-		part.Material = Enum.Material.SmoothPlastic
-		self:SetSize(Plates.DefaultPlateSize)
-	end
 
 	self:UpdateTags()
 	self.Maid.Part = part
@@ -268,11 +272,11 @@ function Plate:RemoveSize(size: Vector3)
 end
 
 function Plate:Grow(amount: number)
-	return self:AddSize(Vector3.new(amount, 0, amount))
+	return self:AddSize(Vector3.new(amount, if self:GetShape() == Enum.PartType.Ball then amount else 0, amount))
 end
 
 function Plate:Shrink(amount: number)
-	return self:RemoveSize(Vector3.new(amount, 0, amount))
+	return self:RemoveSize(Vector3.new(amount, if self:GetShape() == Enum.PartType.Ball then amount else 0, amount))
 end
 
 function Plate:Bring(target: Character.CharacterTarget)
@@ -294,6 +298,32 @@ function Plate:RemoveOwner(player: Player)
 	if self:IsOwner(player) then
 		table.remove(self.Owners, table.find(self.Owners, player))
 		self:UpdateTags()
+	end
+end
+
+function Plate:SetShape(shape: Enum.PartType)
+	local part = self.Part :: PlatePart
+	local plateMesh = Assets.Server.PlateMesh :: { [string]: MeshPart }
+
+	if shape == Enum.PartType.Ball then
+		part:ApplyMesh(plateMesh.Ball)
+	elseif shape == Enum.PartType.Block then
+		part:ApplyMesh(plateMesh.Block)
+	elseif shape == Enum.PartType.Cylinder then
+		part:ApplyMesh(plateMesh.Cylinder)
+	end
+end
+
+function Plate:GetShape(): Enum.PartType
+	local meshId = self.Part.MeshId :: string
+	local plateMesh = Assets.Server.PlateMesh :: { [string]: MeshPart }
+
+	if meshId == plateMesh.Ball.MeshId then
+		return Enum.PartType.Ball
+	elseif meshId == plateMesh.Block.MeshId then
+		return Enum.PartType.Block
+	elseif meshId == plateMesh.Cylinder.MeshId then
+		return Enum.PartType.Cylinder
 	end
 end
 

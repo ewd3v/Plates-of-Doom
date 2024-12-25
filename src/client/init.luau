@@ -15,7 +15,7 @@ if not Network:Init() then
 	return HeadMaid:Destroy()
 end
 
-local Assets = require("shared/assets")
+require("shared/assets")
 local UI = require("client/ui")
 local Teams = require("client/teams")
 local Arena = require("client/arena")

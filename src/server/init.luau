@@ -1,7 +1,11 @@
+if _G.IsGameBuild then
+	game:GetService("Players").CharacterAutoLoads = false
+end
+
 local HeadMaid = require("shared/headMaid")
 HeadMaid.Script = script
 
-local Assets = require("shared/assets")
+require("shared/assets")
 local Network = require("server/network")
 local Arena = require("server/arena")
 local Game = require("server/game")
@@ -29,5 +33,16 @@ end
 Arena:SetSize(100)
 Arena:SetLavaHeight(fallenPartsDestroyHeight)
 Arena:CreateLobby()
+
+if _G.IsGameBuild then
+	local Players = game:GetService("Players")
+	Players.CharacterAutoLoads = true
+
+	for _, player in ipairs(Players:GetPlayers()) do
+		while not pcall(player.LoadCharacter, player) do
+			task.wait()
+		end
+	end
+end
 
 Game:Init()
