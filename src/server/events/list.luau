@@ -4,9 +4,8 @@ local Plates = require("server/plates")
 local Arena = require("server/arena")
 local Maid = require("shared/maid")
 local Scheduler = require("shared/scheduler")
-local Teams = require("server/teams")
-local Team = require("shared/team")
 local Assets = require("shared/assets")
+local Match = require("server/match")
 
 local Selector = require("./selector")
 
@@ -16,7 +15,7 @@ local function randomBoolean(): boolean
 end
 
 local function get2RandomPlayers(): (Player?, Player?)
-	local availablePlayers = Teams:GetPlayers(Team.Playing) -- Will change depending on Game:GetPlaying()
+	local availablePlayers = Match:GetPlaying()
 	if #availablePlayers < 2 then
 		return nil, nil
 	end
@@ -807,6 +806,80 @@ return table.freeze({
 			beam.Attachment0 = attachment1
 			beam.Attachment1 = attachment2
 			beam.Parent = part1
+		end,
+	},
+
+	{
+		1,
+		"1 plate will be given controls",
+		{ 1, Selector.Plate },
+		function(context)
+			local plate = context.Plate
+			local part = plate.Part
+
+			local maid = Maid.new()
+			plate.PartMaid.Controls = maid
+
+			local function addControl(dir: Vector3, rot: number)
+				local activeColor = Color3.fromRGB(165, 79, 21)
+				local inactiveColor = Color3.fromRGB(0, 0, 0)
+				local range = 10
+
+				local control = maid:Add(Instance.new("Part")) :: Part
+				control.Material = Enum.Material.SmoothPlastic
+				control.Color = activeColor
+				control.Size = Vector3.new(2, 0.1, 2)
+				control.Parent = part
+
+				local decal = maid:Add(Instance.new("Decal")) :: Decal
+				decal.Texture = "rbxassetid://153287088"
+				decal.Face = Enum.NormalId.Top
+				decal.Parent = control
+
+				local clickDetector = maid:Add(Instance.new("ClickDetector")) :: ClickDetector
+				clickDetector.MaxActivationDistance = range
+				clickDetector.Parent = control
+
+				local weld = maid:Add(Instance.new("Weld")) :: Weld
+				weld.Part0 = part
+				weld.Part1 = control
+				weld.Parent = control
+
+				local function updateWeld()
+					local size = part.Size
+					weld.C0 = CFrame.new(dir.X * size.X / 2, size.Y / 2, dir.Z * size.Z / 2)
+					weld.C1 = CFrame.new(-1, -0.05, 0) * CFrame.Angles(0, math.rad(rot), 0)
+				end
+
+				updateWeld()
+				maid:GiveTask(part:GetPropertyChangedSignal("Size"):Connect(updateWeld))
+
+				local db = false
+				clickDetector.MouseClick:Connect(function(player: Player)
+					if db or not Match:IsPlaying(player) then
+						return
+					end
+
+					task.delay(2.5, function()
+						db = false
+						control.Color = activeColor
+						clickDetector.MaxActivationDistance = range
+					end)
+
+					db = true
+					control.Color = inactiveColor
+					clickDetector.MaxActivationDistance = 0
+
+					plate:CFrameTo(
+						CFrame.new(plate:GetMoveTarget()) * plate.CFrame.Rotation * CFrame.new(dir * 2.5 * 2)
+					)
+				end)
+			end
+
+			addControl(Vector3.new(1, 0, 0), 180)
+			addControl(Vector3.new(-1, 0, 0), 0)
+			addControl(Vector3.new(0, 0, 1), -90)
+			addControl(Vector3.new(0, 0, -1), 90)
 		end,
 	},
 })

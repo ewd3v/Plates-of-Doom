@@ -72,6 +72,11 @@ function Teams:Init()
 		end
 
 		for player, teamId in next, Teams.List do
+			if player.Parent ~= Players then
+				Teams.List[player] = nil
+				continue
+			end
+
 			local team = Teams.TeamMaid[teamId]
 
 			if player == Players.LocalPlayer and team ~= player.Team then

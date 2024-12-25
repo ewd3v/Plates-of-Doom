@@ -3,7 +3,7 @@ local Maid = require("shared/maid")
 local Signal = require("shared/signal")
 local HeadMaid = require("shared/headMaid")
 
-type team = any
+export type team = any
 
 local Teams = {}
 Teams.Maid = HeadMaid:Add(Maid.new())
@@ -57,7 +57,7 @@ function Teams:GetAmount(team: team?): number
 end
 
 Network.Disconnected:Connect(function(player)
-	Teams.List[player] = nil
+	Teams:Assign(player, nil)
 end)
 
 return Teams

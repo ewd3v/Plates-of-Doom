@@ -11,6 +11,7 @@ local Events = require("server/events")
 local EventSelector = require("server/events/selector")
 local Functions = require("shared/functions")
 local Scheduler = require("shared/scheduler")
+local Match = require("server/match")
 
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
@@ -18,24 +19,6 @@ local Players = game:GetService("Players")
 local Game = {}
 Game.HeadMaid = HeadMaid:Add(Maid.new())
 Game.Maid = Game.HeadMaid:Add(Maid.new())
-
-local function assignAllTeam(team)
-	for _, player in ipairs(Network:GetConnected()) do
-		Teams:Assign(player, team)
-	end
-end
-
-function Game:GetPlaying(): { Player }
-	return Teams:GetPlayers(Team.Playing)
-end
-
-function Game:GetAmountPlaying()
-	return Teams:GetAmount(Team.Playing)
-end
-
-function Game:IsPlaying(player: Player)
-	return Teams:Get(player) == Team.Playing
-end
 
 function Game:Intermission()
 	local duration = if RunService:IsStudio() then 5 else 15
@@ -72,10 +55,10 @@ end
 function Game:StartGame()
 	Status("Starting game...")
 
-	assignAllTeam(Team.Playing)
+	Match:AssignAll(Team.Playing)
 
-	local playerAmount = Game:GetAmountPlaying()
-	for _, player in ipairs(Game:GetPlaying()) do
+	local playerAmount = Match:GetAmountPlaying()
+	for _, player in ipairs(Match:GetPlaying()) do
 		Character.remove(player)
 	end
 
@@ -93,7 +76,7 @@ function Game:StartGame()
 	local takenSpots: { [string]: true } = {}
 	local gridMax = gridSize - 1 -- Coordinates starts at 0
 
-	for _, player in ipairs(Game:GetPlaying()) do
+	for _, player in ipairs(Match:GetPlaying()) do
 		if player.Parent ~= Players then
 			continue
 		end
@@ -136,7 +119,7 @@ function Game:StartGame()
 
 	task.wait(3)
 
-	for _, player in ipairs(Game:GetPlaying()) do
+	for _, player in ipairs(Match:GetPlaying()) do
 		Character.unfreeze(player)
 	end
 
@@ -227,7 +210,7 @@ function Game:RunEvent(possibleEvents)
 
 		local random = Random.new()
 		if selector == EventSelector.Player then
-			local playing = Game:GetPlaying()
+			local playing = Match:GetPlaying()
 			if #playing < 1 then
 				break
 			end
@@ -282,18 +265,18 @@ function Game:RunEvent(possibleEvents)
 end
 
 function Game:EndGame()
-	for _, player in ipairs(Game:GetPlaying()) do
+	for _, player in ipairs(Match:GetPlaying()) do
 		Character.freeze(player)
 		task.defer(Character.load, player)
 
-		Teams:Assign(player, Team.Lobby)
+		Match:RemovePlayer(player)
 	end
 end
 
 function Game:RunCycle()
 	eventContext.Maid:DoCleaning()
 
-	assignAllTeam(Team.Lobby)
+	Match:AssignAll(Team.Lobby)
 	Plates:ClearAll()
 	Arena:Remove()
 
@@ -301,7 +284,7 @@ function Game:RunCycle()
 	Game:StartGame()
 
 	local possibleEvents = Events:GetPossible(Game)
-	while Game:GetAmountPlaying() > (if RunService:IsStudio() then 0 else 1) do
+	while Match:GetAmountPlaying() > (if RunService:IsStudio() then 0 else 1) do
 		Game:RunEvent(possibleEvents)
 	end
 
@@ -312,7 +295,7 @@ end
 
 function Game:PlayerDied(player: Player)
 	if Network:IsConnected(player) then
-		Teams:Assign(player, Team.Lobby)
+		Match:RemovePlayer(player)
 	end
 
 	Plates:PlayerDied(player)
@@ -358,7 +341,7 @@ function Game:Init()
 			forceField.Parent = character
 			task.delay(10, game.Destroy, forceField)
 
-			if Game:IsPlaying(player) then
+			if Match:IsPlaying(player) then
 				return
 			end
 
