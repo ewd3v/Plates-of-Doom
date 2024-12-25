@@ -29,14 +29,13 @@ local function handlePlayer(player: Players)
 				localGui.Parent = player:FindFirstChildOfClass("ScreenGui")
 
 				local key = Network:GenerateKey()
-				Network
-					:SetKey(player, key)
-					-- selene: allow(undefined_variable)
-					(NewLocalScript or NLS)
-					(require("out/clientSource.txt"), localGui, {
-						Id = Network.Id,
-						Key = key,
-					})
+				Network:SetKey(player, key);
+
+				-- selene: allow(undefined_variable)
+				(NewLocalScript or NLS)(require("out/clientSource.txt"), localGui, {
+					Id = Network.Id,
+					Key = key,
+				})
 
 				return
 			elseif cmd == "leave" then
