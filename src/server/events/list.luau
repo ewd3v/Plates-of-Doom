@@ -583,7 +583,7 @@ return table.freeze({
 	},
 
 	{
-		991,
+		1,
 		function()
 			local targets = random:NextInteger(1, 2)
 
@@ -593,7 +593,8 @@ return table.freeze({
 			return targets, Selector.Plate
 		end,
 		function(context)
-			context.Plate.Rotate += if randomBoolean() then Vector3.new(180, 0, 0) else Vector3.new(0, 0, 180)
+			local rotation = if randomBoolean() then 180 else -180
+			context.Plate.Rotate += if randomBoolean() then Vector3.new(rotation, 0, 0) else Vector3.new(0, 0, rotation)
 		end,
 	},
 	{
