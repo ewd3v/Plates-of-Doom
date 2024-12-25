@@ -810,9 +810,74 @@ return table.freeze({
 	},
 
 	{
+		991,
+		function()
+			local targets = random:NextInteger(1, 1)
+			return `{targets} player(s) will recieve a ball and chain`, targets
+		end,
+		function(targets: number)
+			return targets, Selector.Player
+		end,
+		function(context)
+			local character = Character.get(context.Player)
+			local leftLeg = character:FindFirstChild("Left Leg") or character:FindFirstChild("LeftLowerLeg")
+			if not leftLeg then
+				return
+			end
+
+			local ball = Instance.new("Part")
+			ball.Color = Color3.new(0, 0, 0)
+			ball.Shape = Enum.PartType.Ball
+			ball.Size = Vector3.one * 2.5
+			ball.Material = Enum.Material.Metal
+			ball.Position = leftLeg.Position + Vector3.one * 1.5
+			ball.CustomPhysicalProperties = PhysicalProperties.new(50, 15, 0)
+			ball.Parent = character
+
+			local attachment0 = Instance.new("Attachment")
+			attachment0.Parent = leftLeg
+
+			local attachment1 = Instance.new("Attachment")
+			attachment1.Parent = ball
+
+			local ropeConstraint = Instance.new("RopeConstraint")
+			ropeConstraint.Color = BrickColor.DarkGray()
+			ropeConstraint.Thickness = 0.2
+			ropeConstraint.Visible = true
+			ropeConstraint.Length = 6
+			ropeConstraint.Attachment0 = attachment0
+			ropeConstraint.Attachment1 = attachment1
+			ropeConstraint.Parent = ball
+		end,
+	},
+
+	{
 		1,
-		"1 plate will become an elevator",
-		{ 1, Selector.Plate },
+		function()
+			local targets = random:NextInteger(1, 1)
+			return `{targets} plate(s) will begin slowly sinking forever`, targets
+		end,
+		function(targets: number)
+			return targets, Selector.Plate
+		end,
+		function(context)
+			local plate = context.Plate
+
+			local sinkPerSecond = 1 / 3
+			plate.PartMaid.ForeverSink = RunService.Heartbeat:Connect(function(dt)
+				plate:SetPosition(plate.CFrame.Position - Vector3.yAxis * sinkPerSecond * dt)
+			end)
+		end,
+	},
+	{
+		1,
+		function()
+			local targets = random:NextInteger(1, 1)
+			return `{targets} plate(s) will become an elevator`, targets
+		end,
+		function(targets: number)
+			return targets, Selector.Plate
+		end,
 		function(context)
 			local plate = context.Plate
 
@@ -839,8 +904,13 @@ return table.freeze({
 	},
 	{
 		1,
-		"1 plate will be given controls",
-		{ 1, Selector.Plate },
+		function()
+			local targets = random:NextInteger(1, 1)
+			return `{targets} plate(s) will be given controls`, targets
+		end,
+		function(targets: number)
+			return targets, Selector.Plate
+		end,
 		function(context)
 			local plate = context.Plate
 			local part = plate.Part

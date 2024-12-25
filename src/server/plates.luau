@@ -162,10 +162,12 @@ function Plate:Reset(clone: MeshPart?)
 			part.Size += size
 		end
 
-		self.CFrame = part.CFrame
-
 		part.AssemblyLinearVelocity += self.LinearVelocity
 		part.AssemblyAngularVelocity += self.AngularVelocity
+	end))
+
+	self.PartMaid:GiveTask(part:GetPropertyChangedSignal("CFrame"):Connect(function()
+		self.CFrame = part.CFrame
 	end))
 
 	self:UpdateTags()
