@@ -107,12 +107,12 @@ function Network:Connect(player: Player)
 	end
 end
 
-function Network:Disconnect(player: Player)
+function Network:Disconnect(player: Player, why: string?)
 	if not Network:IsConnected(player) then
 		return
 	end
 
-	Network.Maid.Remote:FireClient(player, Network:GetKey(player), Methods.Client.Disconnect)
+	Network.Maid.Remote:FireClient(player, Network:GetKey(player), Methods.Client.Disconnect, why)
 
 	Network.ConnectedPlayers[player] = nil
 	if not _G.IsGameBuild then
@@ -204,12 +204,12 @@ function Network:Init()
 	Network.Maid.DisconnectLoop = Scheduler.connect(1, function()
 		for player, lastPing in next, Network.ConnectedPlayers do
 			if player.Parent ~= Players then
-				Network:Disconnect(player)
+				Network:Disconnect(player, "You left game")
 				continue
 			end
 
-			if not _G.IsGameBuild and os.clock() - lastPing < 15 then
-				Network:Disconnect(player)
+			if not _G.IsGameBuild and os.clock() - lastPing > 15 then
+				Network:Disconnect(player, "You stopped pinging the server")
 				continue
 			end
 		end

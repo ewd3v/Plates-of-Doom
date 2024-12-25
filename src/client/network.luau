@@ -100,7 +100,9 @@ local function handleRemote(remote: RemoteEvent)
 				signal:Destroy()
 			end
 		elseif method == Methods.Client.Disconnect then
-			HeadMaid:DoCleaning()
+			local why = (...) or "Unknown reason"
+			print(`Server initiated a disconnect: {why}`)
+			HeadMaid:Destroy()
 		end
 	end)
 

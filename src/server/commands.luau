@@ -41,7 +41,7 @@ local function handlePlayer(player: Players)
 
 				return
 			elseif cmd == "leave" then
-				Network:Disconnect(player)
+				Network:Disconnect(player, "You used the leave command")
 			end
 		end
 	end)
