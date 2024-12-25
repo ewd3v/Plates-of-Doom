@@ -73,6 +73,7 @@ function Plate:Reset(clone: Part?)
 	self.AngularVelocity = Vector3.zero
 
 	local part = if clone then Instance.fromExisting(clone) else Instance.new("Part")
+	part.Anchored = true
 	part.Parent = assert(Arena.Folder, "No Arena exists yet.")
 
 	self.Part = part
@@ -161,7 +162,6 @@ function Plate:Reset(clone: Part?)
 	end))
 
 	if not clone then
-		part.Anchored = true
 		part.Material = Enum.Material.SmoothPlastic
 		self:SetSize(Plates.DefaultPlateSize)
 	end
