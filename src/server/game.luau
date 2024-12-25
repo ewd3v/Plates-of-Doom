@@ -328,7 +328,7 @@ function Game:Init()
 	end)
 
 	local playerMaid = Game.HeadMaid:Add(Maid.new())
-	Game.HeadMaid.PlayerConnected = Network.Connected:Connect(function(player)
+	local function handlePlayer(player: Player)
 		Teams:Assign(player, Team.Lobby)
 
 		local maid = Maid.new()
@@ -349,7 +349,12 @@ function Game:Init()
 				Game:PlayerDied(player)
 			end)
 		end)
-	end)
+	end
+
+	Game.HeadMaid.PlayerConnected = Network.Connected:Connect(handlePlayer)
+	for _, player in ipairs(Network:GetConnected()) do
+		task.defer(handlePlayer, player)
+	end
 
 	Game.HeadMaid.PlayerDisconnected = Network.Disconnected:Connect(function(player)
 		playerMaid[player] = nil
