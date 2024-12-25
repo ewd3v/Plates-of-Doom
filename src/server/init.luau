@@ -3,7 +3,10 @@ if _G.IsGameBuild then
 end
 
 local HeadMaid = require("shared/headMaid")
-HeadMaid.Script = script
+HeadMaid:GiveTask(function()
+	warn("Server stop!")
+	script:Destroy()
+end)
 
 require("shared/assets")
 require("server/commands")

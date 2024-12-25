@@ -48,8 +48,8 @@ function UI:IsOK(): boolean
 end
 
 function UI:Init()
+	UI:Create()
 	if _G.IsGameBuild then
-		UI:Create()
 		return
 	end
 

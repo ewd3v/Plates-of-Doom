@@ -1,5 +1,8 @@
 local HeadMaid = require("shared/headMaid")
-HeadMaid.Script = script
+HeadMaid:GiveTask(function()
+	warn("Client stop!")
+	script:Destroy()
+end)
 
 local Network = require("client/network")
 
@@ -22,6 +25,7 @@ end
 
 -- Check if it failed to connect (meaning we're not the correct client, so we should quit)
 if not Network:Init() then
+	print("Network failed! Did you accidentally run 2 localscripts? (If so run the other one.)")
 	return HeadMaid:Destroy()
 end
 
