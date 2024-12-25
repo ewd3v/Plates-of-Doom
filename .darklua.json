@@ -35,6 +35,12 @@
 
     "remove_types",
     "remove_comments",
-    "remove_spaces"
+    "remove_spaces",
+
+    "remove_continue",
+    "remove_floor_division",
+    "remove_if_expression",
+    "remove_interpolated_string",
+    "remove_types"
   ]
 }
