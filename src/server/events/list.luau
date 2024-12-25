@@ -479,18 +479,23 @@ return table.freeze({
 			-- Give a 1 second grace period
 			maid.TouchedThread = task.delay(1, function()
 				maid.Touched = laser.Touched:Connect(function(hit)
-					Character.damage(hit.Parent, 15)
+					Character.damage(hit.Parent, 10)
 				end)
 			end)
 
-			local rotationPerSec = 30
+			local rotationPerSec = random:NextNumber(25, 35)
+			if randomBoolean() then
+				rotationPerSec = -rotationPerSec
+			end
+
 			local rotation = random:NextNumber(0, 360)
 			maid.Loop = RunService.Heartbeat:Connect(function(dt)
 				local maxSize = math.max(part.Size.X, part.Size.Z)
 				laser.Size = Vector3.new((2 ^ 0.5) * maxSize, 1, 1)
 
-				rotation += rotationPerSec * dt
-				laser.CFrame = CFrame.new(part.Position + Vector3.yAxis * (part.Size.Y / 2 + 0.5))
+				rotation = (rotation + rotationPerSec * dt) % 360
+				laser.CFrame = part.CFrame
+					* CFrame.new(Vector3.yAxis * (part.Size.Y / 2 + 0.5))
 					* CFrame.Angles(0, math.rad(rotation), 0)
 			end)
 		end,

@@ -129,9 +129,6 @@ function Game:StartGame()
 		end
 	end
 
-	local d = Plates.new()
-	d:SetPosition(Arena.Origin + Vector3.new(10, 10, 10))
-
 	task.wait(3)
 
 	for _, player in ipairs(Game:GetPlaying()) do
