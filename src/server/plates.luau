@@ -176,12 +176,16 @@ function Plate:Kill()
 	local maid = Maid.new()
 	self.Maid.Kill = maid
 
-	local sound = maid:Add(Instance.new("Sound"))
+	local sound = maid:Add(Instance.new("Sound")) :: Sound
 	sound.SoundId = "rbxassetid://8863377426" -- "rbxassetid://1034263055"
 	sound.Volume = 4
 	sound.PlaybackSpeed = Random.new():NextNumber(1.05, 1.175)
 	sound.Parent = self.Part
 	sound:Play()
+
+	sound.Ended:Once(function()
+		sound:Destroy()
+	end)
 
 	local oldTransparency = self.Part.Transparency
 	self.Part.Transparency = 0.25

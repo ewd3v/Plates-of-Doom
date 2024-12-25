@@ -159,6 +159,24 @@ function eventContext:Highlight(instance: Instance)
 	highlight.Parent = instance
 
 	task.delay(0.75, game.Destroy, highlight)
+
+	local soundTarget = if instance:IsA("Model")
+		then instance.PrimaryPart
+		elseif instance:IsA("BasePart") then instance
+		else nil
+
+	if soundTarget then
+		local sound = Instance.new("Sound")
+		sound.SoundId = "rbxassetid://6380285152"
+		sound.Volume = 4
+		sound.PlaybackSpeed = Random.new():NextNumber(1, 1.05) + (#self.Names - 1) * 0.1
+		sound.Parent = soundTarget
+		sound:Play()
+
+		sound.Ended:Once(function()
+			sound:Destroy()
+		end)
+	end
 end
 
 function eventContext:ShowPlayer(player: Player)
