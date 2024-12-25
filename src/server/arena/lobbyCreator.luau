@@ -101,6 +101,11 @@ return function(origin: Vector3, arenaSize: number, lavaHeight: number): Model
 		lava.Size = Vector3.new(arenaSize, width, arenaSize)
 		lava.Material = Enum.Material.Neon
 		lava.Color = Color3.fromRGB(211, 56, 17)
+
+		lava.Touched:Connect(function(hit)
+			hit:BreakJoints()
+			hit:Destroy()
+		end)
 	end
 
 	return lobby

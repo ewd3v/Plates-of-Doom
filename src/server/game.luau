@@ -10,6 +10,7 @@ local Character = require("server/character")
 local Events = require("server/events")
 local EventSelector = require("server/events/selector")
 local Functions = require("shared/functions")
+local Scheduler = require("shared/scheduler")
 
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
@@ -373,6 +374,8 @@ function Game:Init()
 				end
 			end
 
+			task.wait(0.1)
+
 			local spawnLocation = spawnLocations[Random.new():NextInteger(1, #spawnLocations)]
 			character:MoveTo(spawnLocation.Position)
 		end
@@ -411,6 +414,32 @@ function Game:Init()
 	Game.HeadMaid.PlayerDisconnected = Network.Disconnected:Connect(function(player)
 		playerMaid[player] = nil
 		Game:PlayerDied(player)
+	end)
+
+	Game.HeadMaid.OutOfBoundsLoop = Scheduler.connect(0.5, function()
+		local maxDist = Arena.Size / 2 + 100
+		local ori = Arena.Origin
+
+		for _, player in ipairs(Network:GetConnected()) do
+			local root = Character.getRoot(player)
+			if not root then
+				continue
+			end
+
+			local pos = root.Position
+
+			if
+				pos.X > ori.X + maxDist
+				or pos.X < ori.X - maxDist
+				or pos.Z > ori.Z + maxDist
+				or pos.Z < ori.Z - maxDist
+			then
+				Game:PlayerDied(player)
+
+				Character.remove(player)
+				Character.load(player)
+			end
+		end
 	end)
 end
 

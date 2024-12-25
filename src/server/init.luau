@@ -28,7 +28,7 @@ else
 	local x, xNegative = random:NextNumber(25_000, 100_000), random:NextInteger(0, 1) == 1
 	local z, zNegative = random:NextNumber(25_000, 100_000), random:NextInteger(0, 1) == 1
 
-	Arena:SetOrigin(Vector3.new(if xNegative then -x else x, yPosition, if zNegative then -z else z))
+	Arena:SetOrigin(Vector3.new(if xNegative then -x else x, yPosition + 500, if zNegative then -z else z))
 end
 
 Arena:SetSize(100)

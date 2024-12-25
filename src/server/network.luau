@@ -137,7 +137,10 @@ function Network:CreateRemote()
 
 	Network.Maid.OnServerEvent = remote.OnServerEvent:Connect(function(player, key: string, method, ...)
 		if method == Methods.Server.Connect and not Network:IsConnected(player) then
-			if not _G.IsGameBuild and (key == nil or key ~= Network.PlayerKeys[player].Server) then
+			if
+				not _G.IsGameBuild
+				and (key == nil or not Network.PlayerKeys[player] or key ~= Network.PlayerKeys[player].Server)
+			then
 				return remote:FireClient(player, Network:GetKey(player), Methods.Client.ConnectResult, false)
 			end
 
@@ -148,7 +151,7 @@ function Network:CreateRemote()
 		end
 
 		if not _G.IsGameBuild then
-			if key == nil or key ~= Network.PlayerKeys[player].Server then
+			if key == nil or not Network.PlayerKeys[player] or key ~= Network.PlayerKeys[player].Server then
 				return
 			end
 		end
