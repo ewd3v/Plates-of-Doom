@@ -25,6 +25,36 @@ local function get2RandomPlates(): (Plates.Plate?, Plates.Plate?)
 end
 
 return table.freeze({
+	--[[{
+		1, -- Weight of the event, i.e chances of it getting run (higher is more likely).
+		function() -- The Init function, 1st arg is the event to display, the rest will be sent to the Selector and Run function
+			local targets = random:NextInteger(1, 2)
+
+			return `{targets} plate(s) will do something`, targets
+		end,
+		function(targets: number) -- The Selector function, returns how many things to select, and what. It gets sent all args passed by the Init function.
+			-- 3rd argument is if by default the game should "show" what players got selected, if you set it to false you have to do it manually
+			-- Setting 4th argument to true will run the Run function with all selected players & plates at the same time (read context.Players & context.Plates).
+			return targets, Selector.Plate
+		end,
+		function(context) -- The Run function, 1st arg is always "context", and the rest are args passed from the Init function.
+			-- context.Player -- The player that got selected
+			-- context.Plate -- The plate that got selected (note: Plate.Owners may be empty or have multiple owners)
+			-- context.Players -- All selected players (as of running, not future selected players)
+			-- context.Plates -- All selected plates (as of running, not future selected plates)
+			-- context.Amount -- The amount that was selected (if you want to get it this way)
+			-- context.Selector -- The type of selector used
+			-- context.Event -- The event object for our data, Event.Data is referring to this event table
+			-- context.Status -- The status displayed by the Init function
+			-- context.ShowSelected -- 3rd argument by the Selector function
+			-- context.CombineSelected -- 4th argument by the Selector function
+		end,
+
+		-- The Init and Selector function doesn't have to be a function, if it always returns static things you may just make it an array with all the return args.
+		-- It is also possible to set the Init and Selector function to any value (other than a table),
+		-- in which case it will act the first argument (only really viable in the Init function, as the Selector has to return at minimum 2 things).
+	},]]
+
 	{
 		1,
 		function()
