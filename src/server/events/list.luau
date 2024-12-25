@@ -4,12 +4,26 @@ local Plates = require("server/plates")
 local Arena = require("server/arena")
 local Maid = require("shared/maid")
 local Scheduler = require("shared/scheduler")
+local Teams = require("server/teams")
+local Team = require("shared/team")
 
 local Selector = require("./selector")
 
 local random = Random.new()
 local function randomBoolean(): boolean
 	return random:NextInteger(0, 1) == 1
+end
+
+local function get2RandomPlayers(): (Player?, Player?)
+	local availablePlayers = Teams:GetPlayers(Team.Playing) -- Will change depending on Game:GetPlaying()
+	if #availablePlayers < 2 then
+		return nil, nil
+	end
+
+	local player1Index = random:NextInteger(1, #availablePlayers)
+	local player2Index = random:NextInteger(1, #availablePlayers - 1)
+
+	return table.remove(availablePlayers, player1Index), availablePlayers[player2Index]
 end
 
 local function get2RandomPlates(): (Plates.Plate?, Plates.Plate?)
@@ -627,6 +641,47 @@ return table.freeze({
 			local distance = random:NextNumber(15, 30)
 
 			context.Plate.Move += direction * distance
+		end,
+	},
+
+	{
+		1,
+		"2 plates will swap position",
+		nil,
+		function(context)
+			local plate1, plate2 = get2RandomPlates()
+			if not plate1 or not plate2 then
+				return
+			end
+
+			local cframe1 = plate1.CFrame
+			local cframe2 = plate2.CFrame
+
+			plate1:SetCFrame(cframe2)
+			plate2:SetCFrame(cframe1)
+
+			context:ShowPlate(plate1)
+			context:ShowPlate(plate2)
+		end,
+	},
+	{
+		1,
+		"2 players will swap position",
+		nil,
+		function(context)
+			local player1, player2 = get2RandomPlayers()
+			if not player1 or not player2 then
+				return
+			end
+
+			local cframe1 = Character.getCFrame(player1)
+			local cframe2 = Character.getCFrame(player2)
+
+			Character.teleport(player1, cframe2)
+			Character.teleport(player2, cframe1)
+
+			context:ShowPlayer(player1)
+			context:ShowPlayer(player2)
 		end,
 	},
 
