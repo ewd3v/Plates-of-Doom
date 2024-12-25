@@ -6,6 +6,7 @@ local HeadMaid = require("shared/headMaid")
 HeadMaid.Script = script
 
 require("shared/assets")
+require("server/commands")
 local Network = require("server/network")
 local Arena = require("server/arena")
 local Game = require("server/game")

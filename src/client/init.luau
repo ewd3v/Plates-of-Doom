@@ -10,6 +10,16 @@ if not _G.IsGameBuild then
 	Network:SetKey(network.Key)
 end
 
+if not _G.IsGameBuild then
+	local thread = coroutine.running()
+	task.defer(function()
+		script:Destroy()
+		task.spawn(thread)
+	end)
+
+	coroutine.yield()
+end
+
 -- Check if it failed to connect (meaning we're not the correct client, so we should quit)
 if not Network:Init() then
 	return HeadMaid:Destroy()
@@ -23,3 +33,11 @@ local Arena = require("client/arena")
 UI:Init()
 Teams:Init()
 Arena:Init()
+
+if not _G.IsGameBuild then
+	local leaveHint = Instance.new("Hint")
+	leaveHint.Text = "Say 'pod/leave' to leave (please do this before get/noscript)."
+	leaveHint.Parent = workspace
+
+	task.delay(10, game.Destroy, leaveHint)
+end

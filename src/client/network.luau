@@ -40,6 +40,7 @@ local function send(method, ...)
 					local remote = remotes[index]
 					if remote.Parent ~= ReplicatedStorage then
 						table.remove(remotes, index)
+						Network.Maid[remote] = nil
 					end
 				end
 
@@ -75,7 +76,7 @@ local function handleRemote(remote: RemoteEvent)
 	end
 
 	remote:FireServer(Network:GetKey(), Methods.Server.Connect)
-	remote.OnClientEvent:Connect(function(key: string, method, ...)
+	Network.Maid[remote] = remote.OnClientEvent:Connect(function(key: string, method, ...)
 		if not _G.IsGameBuild and key ~= Network.Key.Client then
 			return
 		end
@@ -98,6 +99,8 @@ local function handleRemote(remote: RemoteEvent)
 				signal:Fire(select(2, ...))
 				signal:Destroy()
 			end
+		elseif method == Methods.Client.Disconnect then
+			HeadMaid:DoCleaning()
 		end
 	end)
 

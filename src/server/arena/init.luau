@@ -12,6 +12,13 @@ Arena.Origin = Vector3.zero
 Arena.Size = 0
 Arena.LavaHeight = -100
 
+local root = if _G.IsGameBuild then workspace else script
+if not _G.IsGameBuild and script.Parent ~= workspace then
+	task.defer(function()
+		script.Parent = workspace
+	end)
+end
+
 function Arena:SetOrigin(origin: Vector3)
 	Arena.Origin = origin
 	Network:FireAllClients("SetArenaOrigin", origin)
@@ -37,7 +44,7 @@ function Arena:Create()
 		Arena.Arena = nil
 	end)
 
-	arena.Parent = workspace
+	arena.Parent = root
 end
 
 function Arena:Remove()
@@ -46,7 +53,7 @@ end
 
 function Arena:CreateLobby()
 	Arena.Maid.Lobby = lobbyCreator(Arena.Origin, Arena.Size, Arena.LavaHeight)
-	Arena.Maid.Lobby.Parent = workspace
+	Arena.Maid.Lobby.Parent = root
 
 	Network:FireAllClients("SetArenaLobby", Arena.Maid.Lobby)
 end

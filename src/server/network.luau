@@ -112,6 +112,8 @@ function Network:Disconnect(player: Player)
 		return
 	end
 
+	Network.Maid.Remote:FireClient(player, Network:GetKey(player), Methods.Client.Disconnect)
+
 	Network.ConnectedPlayers[player] = nil
 	if not _G.IsGameBuild then
 		Network.ListeningPlayers[player] = nil
@@ -133,7 +135,7 @@ function Network:CreateRemote()
 	remote.Archivable = false
 	remote.Parent = ReplicatedStorage
 
-	remote.OnServerEvent:Connect(function(player, key: string, method, ...)
+	Network.Maid.OnServerEvent = remote.OnServerEvent:Connect(function(player, key: string, method, ...)
 		if method == Methods.Server.Connect and not Network:IsConnected(player) then
 			if not _G.IsGameBuild and (key == nil or key ~= Network.PlayerKeys[player].Server) then
 				return remote:FireClient(player, Network:GetKey(player), Methods.Client.ConnectResult, false)

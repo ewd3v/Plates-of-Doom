@@ -10,5 +10,6 @@ return table.freeze({
 		"ConnectResult",
 		"Event",
 		"InvokeResult",
+		"Disconnect",
 	}),
 })
