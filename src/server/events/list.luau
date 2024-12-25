@@ -519,7 +519,7 @@ return table.freeze({
 		function()
 			local targets = random:NextInteger(1, 2)
 
-			return `{targets} plate(s) move`, targets
+			return `{targets} plate(s) will move`, targets
 		end,
 		function(targets: number)
 			return targets, Selector.Plate
