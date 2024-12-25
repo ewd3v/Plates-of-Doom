@@ -53,6 +53,11 @@ function Character.getHumanoid(target: CharacterTarget): Humanoid?
 	end
 end
 
+function Character.isReady(target: CharacterTarget): boolean
+	local character = Character.get(target)
+	return Character.getRoot(character) and character:IsDescendantOf(workspace)
+end
+
 function Character.getCFrame(target: CharacterTarget): CFrame?
 	local root = Character.getRoot(target)
 	if root then
@@ -142,7 +147,7 @@ function Character.refresh(player: Player)
 		task.wait()
 	end
 
-	while not Character.getRoot(player) or not player.Character:IsDescendantOf(workspace) do
+	while not Character.isReady(player) do
 		task.wait()
 	end
 

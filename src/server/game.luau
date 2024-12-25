@@ -32,6 +32,10 @@ function Game:GetAmountPlaying()
 	return Teams:GetAmount(Team.Playing)
 end
 
+function Game:IsPlaying(player: Player)
+	return Teams:Get(player) == Team.Playing
+end
+
 function Game:Intermission()
 	local duration = if RunService:IsStudio() then 5 else 15
 	local playersNeeded = if RunService:IsStudio() then 1 else 2
@@ -115,7 +119,7 @@ function Game:StartGame()
 			task.wait()
 		end
 
-		while not Character.getRoot(player) or not player.Character:IsDescendantOf(workspace) do
+		while not Character.isReady(player) do
 			task.wait()
 		end
 
@@ -339,10 +343,46 @@ function Game:Init()
 	local function handlePlayer(player: Player)
 		Teams:Assign(player, Team.Lobby)
 
+		local function onSpawn(character: Model)
+			if _G.IsGameBuild then
+				return
+			end
+
+			while not Character.isReady(character) do
+				task.wait()
+			end
+
+			-- Compat
+			local forceField = Instance.new("ForceField")
+			forceField.Parent = character
+			task.delay(10, game.Destroy, forceField)
+
+			if Game:IsPlaying(player) then
+				return
+			end
+
+			local lobby = Arena.Maid.Lobby
+			if not lobby then
+				return
+			end
+
+			local spawnLocations = {}
+			for _, child in ipairs(lobby:GetChildren()) do
+				if child.Name == "SpawnLocation" then
+					table.insert(child, spawnLocations)
+				end
+			end
+
+			local spawnLocation = spawnLocations[Random.new():NextInteger(1, #spawnLocations)]
+			character:MoveTo(spawnLocation.Position)
+		end
+
 		local maid = Maid.new()
 		playerMaid[player] = maid
 
 		maid.CharacterAdded = player.CharacterAdded:Connect(function(character)
+			task.defer(onSpawn, character)
+
 			local humanoid
 			while true do
 				humanoid = character:FindFirstChildOfClass("Humanoid")
@@ -357,6 +397,10 @@ function Game:Init()
 				Game:PlayerDied(player)
 			end)
 		end)
+
+		if player.Character then
+			task.defer(onSpawn, player.Character)
+		end
 	end
 
 	Game.HeadMaid.PlayerConnected = Network.Connected:Connect(handlePlayer)
