@@ -10,7 +10,8 @@ local module = {}
 function module:Create(maid, screenGui: ScreenGui)
 	local billboard = Instance.new("BillboardGui")
 	billboard.AlwaysOnTop = true
-	billboard.ExtentsOffsetWorldSpace = Vector3.new(0, 2.5, 0)
+	billboard.ExtentsOffsetWorldSpace = Vector3.new(0, 1, 0)
+	billboard.StudsOffsetWorldSpace = Vector3.new(0, 1.5, 0)
 	billboard.ResetOnSpawn = false
 	billboard.Size = UDim2.fromScale(1, 2)
 	billboard.ClipsDescendants = false

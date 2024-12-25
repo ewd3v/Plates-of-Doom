@@ -528,7 +528,7 @@ return table.freeze({
 	},
 
 	{
-		991,
+		1,
 		function()
 			local targets = random:NextInteger(1, 2)
 
@@ -564,7 +564,7 @@ return table.freeze({
 		end,
 	},
 	{
-		991,
+		1,
 		function()
 			local targets = random:NextInteger(1, 2)
 
@@ -583,7 +583,7 @@ return table.freeze({
 	},
 
 	{
-		1,
+		991,
 		function()
 			local targets = random:NextInteger(1, 2)
 
