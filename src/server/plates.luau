@@ -325,7 +325,9 @@ function Plates:PlayerDied(player: Player)
 
 		plate:RemoveOwner(player)
 		if #plate.Owners <= 0 then
-			plate:Kill()
+			task.defer(function()
+				plate:Kill()
+			end)
 		end
 	end
 end
