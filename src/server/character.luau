@@ -1,3 +1,5 @@
+local Arena = require("server/arena")
+
 local Players = game:GetService("Players")
 local Character = {}
 
@@ -107,7 +109,7 @@ function Character.teleport(
 	local hipHeight = if humanoid then humanoid.HipHeight else 2
 
 	-- :MoveTo() moves the target out of any obstruction, preventing clipping
-	character:MoveTo(location.Position)
+	Arena.moveTo(character, location.Position)
 
 	-- Then use :PivotTo() to apply rotation and move upwards (to offset for hipheight)
 	character:PivotTo(CFrame.new(root.Position + Vector3.yAxis * hipHeight) * location.Rotation)

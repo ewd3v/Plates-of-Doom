@@ -365,6 +365,10 @@ function Game:Init()
 		Teams:Assign(player, Team.Lobby)
 
 		local function onSpawn(character: Model)
+			if Match:IsPlaying(player) then
+				Arena:Allow(character)
+			end
+
 			if _G.IsGameBuild then
 				return
 			end
@@ -382,7 +386,7 @@ function Game:Init()
 				return
 			end
 
-			local lobby = Arena.Maid.Lobby
+			local lobby = Arena.Lobby
 			if not lobby then
 				return
 			end

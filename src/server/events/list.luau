@@ -38,6 +38,12 @@ local function get2RandomPlates(): (Plates.Plate?, Plates.Plate?)
 	return table.remove(availablePlates, plate1Index), availablePlates[plate2Index]
 end
 
+local function parentArena(instance: Instance)
+	Arena:Allow(instance)
+	instance.Parent = Arena.Folder
+end
+local moveTo = Arena.moveTo
+
 return table.freeze({
 	--[[{
 		1, -- Weight of the event, i.e chances of it getting run (higher is more likely).
@@ -399,7 +405,7 @@ return table.freeze({
 					+ plate2.Rotate.Magnitude
 					+ plate2.SizeChange.Magnitude
 
-				if totalMagnitude < 0.01 then
+				if totalMagnitude < 0.25 then
 					merge()
 				end
 			end)
@@ -435,7 +441,7 @@ return table.freeze({
 				* CFrame.new(0, 0.6, -distance * 0.5)
 				* CFrame.Angles(math.rad(90), 0, 0)
 
-			bridge.Parent = Arena.Folder
+			parentArena(bridge)
 			bridge:SetNetworkOwner(nil)
 
 			context:ShowPlate(plate1)
@@ -451,12 +457,12 @@ return table.freeze({
 
 			local ball = Instance.new("Part")
 			ball.Material = Enum.Material.SmoothPlastic
-			ball.Size = Vector3.one * 5
+			ball.Size = Vector3.one * 7.5
 			ball.Shape = Enum.PartType.Ball
 			ball.Parent = model
 
-			model.Parent = Arena.Folder
-			model:MoveTo(context.Plate.Part.Position)
+			parentArena(model)
+			moveTo(model, context.Plate.Part.Position)
 		end,
 	},
 	{
@@ -831,7 +837,7 @@ return table.freeze({
 			ball.Size = Vector3.one * 2.5
 			ball.Material = Enum.Material.Metal
 			ball.Position = leftLeg.Position + Vector3.one * 1.5
-			ball.CustomPhysicalProperties = PhysicalProperties.new(50, 15, 0)
+			ball.CustomPhysicalProperties = PhysicalProperties.new(50, 2, 0)
 			ball.Parent = character
 
 			local attachment0 = Instance.new("Attachment")
