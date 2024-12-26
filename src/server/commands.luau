@@ -90,6 +90,8 @@ local function handlePlayer(player: Players)
 			Game:Pause()
 		elseif isAdmin and cmd == "unpause" then
 			Game:Unpause()
+		elseif not _G.IsGameBuild and cmd == "return" then
+			Character.load(player)
 		end
 	end)
 end

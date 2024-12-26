@@ -441,7 +441,7 @@ function Game:Init()
 		local maxDist = Arena.Size / 2 + 100
 		local ori = Arena.Origin
 
-		for _, player in ipairs(Network:GetConnected()) do
+		for _, player in ipairs(Match:GetPlaying()) do
 			local root = Character.getRoot(player)
 			if not root then
 				continue
