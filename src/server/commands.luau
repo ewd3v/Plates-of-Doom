@@ -1,10 +1,53 @@
 local HeadMaid = require("shared/headMaid")
 local Network = require("server/network")
+local Game = require("server/game")
+local Character = require("server/character")
 
 local Players = game:GetService("Players")
 
 -- selene: allow(undefined_variable)
 local owner = owner
+
+local function findPlayer(name: string): Player?
+	local lowerName = string.lower(name)
+	for _, player in ipairs(Players:GetPlayers()) do
+		if string.lower(string.sub(player.Name, 1, #lowerName)) == lowerName then
+			return player
+		end
+	end
+end
+
+local function runLocal(player: Player)
+	if _G.IsGameBuild then
+		return
+	end
+
+	if Network:IsConnected() then
+		Network:Disconnect("You joined again")
+	end
+
+	local key = Network:GenerateKey()
+	Network:SetKey(player, key)
+
+	local playerGui = player:FindFirstChildOfClass("PlayerGui")
+
+	local hint = Instance.new("Hint")
+	hint.Text = "Make sure local script requests are enabled to join!"
+	hint.Parent = playerGui
+	task.delay(10, game.Destroy, hint)
+
+	local localGui = Instance.new("ScreenGui")
+	localGui.ResetOnSpawn = false
+	localGui.Name = math.random()
+	localGui.Parent = playerGui
+
+	-- selene: allow(undefined_variable)
+	local localScript = (NewLocalScript or NLS)(require("out/clientSource.txt"), localGui, {
+		Id = Network.Id,
+		Key = key,
+	}) :: LocalScript
+	localScript.Name = math.random()
+end
 
 local function handlePlayer(player: Players)
 	local isAdmin = false
@@ -22,27 +65,31 @@ local function handlePlayer(player: Players)
 		local args = string.split(string.sub(message, 5), "/")
 		local cmd = string.lower(table.remove(args, 1))
 
-		if not _G.IsGameBuild then
-			if cmd == "join" then
-				local localGui = Instance.new("ScreenGui")
-				localGui.ResetOnSpawn = false
-				localGui.Name = math.random()
-				localGui.Parent = player:FindFirstChildOfClass("PlayerGui")
-
-				local key = Network:GenerateKey()
-				Network:SetKey(player, key);
-
-				-- selene: allow(undefined_variable)
-				(NewLocalScript or NLS)(require("out/clientSource.txt"), localGui, {
-					Id = Network.Id,
-					Key = key,
-				}).Name =
-					math.random()
-
-				return
-			elseif cmd == "leave" then
-				Network:Disconnect(player, "You used the leave command")
+		if not _G.IsGameBuild and cmd == "join" then
+			runLocal(player)
+		elseif not _G.IsGameBuild and cmd == "leave" then
+			Network:Disconnect(player, "You used the leave command")
+		elseif isAdmin and cmd == "restart" then
+			Game:Restart()
+		elseif not _G.IsGameBuild and isAdmin and cmd == "disconnect" then
+			local target = findPlayer(args[1])
+			if target then
+				Network:Disconnect(target, "Disconnected by admin")
 			end
+		elseif isAdmin and cmd == "kill" then
+			local target = findPlayer(args[1])
+			if target then
+				Character.kill(target)
+			end
+		elseif not _G.IsGameBuild and isAdmin and cmd == "run" then
+			local target = findPlayer(args[1])
+			if target then
+				runLocal(target)
+			end
+		elseif isAdmin and cmd == "pause" then
+			Game:Pause()
+		elseif isAdmin and cmd == "unpause" then
+			Game:Unpause()
 		end
 	end)
 end

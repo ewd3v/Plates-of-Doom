@@ -8,6 +8,10 @@ Network.invoke("GetStatus", function()
 end)
 
 function Status:Set(text: string)
+	if Status.Current == text then
+		return
+	end
+
 	Status.Current = text
 	Network:FireAllClients("SetStatus", text)
 end

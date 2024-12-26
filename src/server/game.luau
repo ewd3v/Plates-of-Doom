@@ -19,6 +19,33 @@ local Players = game:GetService("Players")
 local Game = {}
 Game.HeadMaid = HeadMaid:Add(Maid.new())
 Game.Maid = Game.HeadMaid:Add(Maid.new())
+Game.EndEarly = false
+Game.Paused = false
+
+function Game:Restart()
+	Game.EndEarly = true
+	task.defer(function()
+		while Game.EndEarly do
+			Status("Restarting...")
+			task.wait()
+		end
+	end)
+end
+
+function Game:Pause()
+	Game.Paused = true
+end
+
+function Game:Unpause()
+	Game.Paused = false
+end
+
+function Game:YieldIfPaused()
+	while Game.Paused do
+		Status("Game paused")
+		task.wait()
+	end
+end
 
 function Game:Intermission()
 	local duration = if RunService:IsStudio() then 5 else 15
@@ -42,6 +69,7 @@ function Game:Intermission()
 				break
 			end
 
+			Game:YieldIfPaused()
 			Status(`Intermission - {left}`)
 			task.wait(1)
 		end
@@ -182,9 +210,18 @@ function Game:RunEvent(possibleEvents)
 	local args = table.pack(event:Init())
 
 	local status = args[1]
-	for left = 5, 0, -0.1 do
-		Status(`{status} - {math.round(left * 10) / 10}`)
-		task.wait(0.1)
+	local durationLeft = 5
+	while durationLeft > 0 do
+		Game:YieldIfPaused()
+		if Game.EndEarly then
+			return
+		end
+
+		local display = math.round(math.max(durationLeft, 0) * 10) / 10
+		local isWhole = math.floor(display) == display
+		Status(`{status} - {display}{if isWhole then ".0" else ""}`)
+
+		durationLeft -= RunService.Heartbeat:Wait()
 	end
 
 	local amount, selector, showSelected, combineSelected = event:Selector(unpack(args, 2, args.n))
@@ -274,6 +311,7 @@ function Game:EndGame()
 end
 
 function Game:RunCycle()
+	Game.EndEarly = false
 	eventContext.Maid:DoCleaning()
 
 	Match:AssignAll(Team.Lobby)
@@ -284,13 +322,15 @@ function Game:RunCycle()
 	Game:StartGame()
 
 	local possibleEvents = Events:GetPossible(Game)
-	while Match:GetAmountPlaying() > (if RunService:IsStudio() then 0 else 1) do
+	while Match:GetAmountPlaying() > (if RunService:IsStudio() then 0 else 1) and not Game.EndEarly do
+		Game:YieldIfPaused()
 		Game:RunEvent(possibleEvents)
 	end
 
 	Game:EndGame()
 
-	task.wait(2)
+	Game.EndEarly = false
+	task.wait(3)
 end
 
 function Game:PlayerDied(player: Player)
@@ -307,9 +347,6 @@ function Game:Init()
 			local success, err = pcall(function()
 				Game.Maid:DoCleaning()
 				Game:RunCycle()
-
-				Status("Game cycle end")
-				task.wait(1)
 			end)
 
 			if success then
@@ -395,6 +432,7 @@ function Game:Init()
 	end
 
 	Game.HeadMaid.PlayerDisconnected = Network.Disconnected:Connect(function(player)
+		pcall(player.LoadCharacter, player)
 		playerMaid[player] = nil
 		Game:PlayerDied(player)
 	end)
