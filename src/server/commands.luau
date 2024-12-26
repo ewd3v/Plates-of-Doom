@@ -2,6 +2,8 @@ local HeadMaid = require("shared/headMaid")
 local Network = require("server/network")
 local Game = require("server/game")
 local Character = require("server/character")
+local Maid = require("shared/maid")
+local Scheduler = require("shared/scheduler")
 
 local Players = game:GetService("Players")
 
@@ -92,6 +94,11 @@ local function handlePlayer(player: Players)
 			Game:Unpause()
 		elseif not _G.IsGameBuild and cmd == "return" then
 			Character.load(player)
+		elseif not _G.IsGameBuild and isAdmin and cmd == "stop" then
+			for _, target in ipairs(Network:GetConnected()) do
+				Network:Disconnect(target, "Server stopped")
+			end
+			HeadMaid:DoCleaning()
 		end
 	end)
 end
@@ -102,11 +109,46 @@ for _, player in ipairs(Players:GetPlayers()) do
 end
 
 if not _G.IsGameBuild then
-	local joinHint = Instance.new("Hint")
-	joinHint.Text = "Ew's Plates of Doom loaded! Say 'pod/join' to join."
-	joinHint.Parent = workspace
+	script.Name = math.random() .. "pod"
 
-	task.delay(10, game.Destroy, joinHint)
+	local random = Random.new()
+	local offset = Vector3.new(
+		if random:NextInteger(0, 1) == 1 then 15 else -15,
+		5,
+		if random:NextInteger(0, 1) == 1 then 15 else -15
+	)
+
+	local maid = HeadMaid:Add(Maid.new())
+	local function refit()
+		maid:DoCleaning()
+
+		local billboard = maid:Add(Instance.new("BillboardGui")) :: BillboardGui
+		billboard.AlwaysOnTop = false
+		billboard.StudsOffsetWorldSpace = offset
+		billboard.ResetOnSpawn = false
+		billboard.Size = UDim2.fromScale(1, 2)
+		billboard.ClipsDescendants = false
+		billboard.Parent = script
+
+		local textLabel = maid:Add(Instance.new("TextLabel")) :: TextLabel
+		textLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+		textLabel.AutomaticSize = Enum.AutomaticSize.X
+		textLabel.BackgroundTransparency = 1
+		textLabel.Position = UDim2.fromScale(0.5, 0.5)
+		textLabel.Size = UDim2.fromScale(0, 1)
+		textLabel.TextColor3 = Color3.new(1, 1, 1)
+		textLabel.TextScaled = true
+		textLabel.Text = "Ew's Plates of doom: Say 'pod/join' to join."
+		textLabel.Parent = billboard
+
+		local stroke = maid:Add(Instance.new("UIStroke")) :: UIStroke
+		stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
+		stroke.Color = Color3.new(0, 0, 0)
+		stroke.Parent = textLabel
+	end
+
+	refit()
+	HeadMaid:GiveTask(Scheduler.connect(1, refit))
 end
 
 return nil

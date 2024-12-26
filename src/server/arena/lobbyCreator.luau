@@ -103,7 +103,10 @@ return function(origin: Vector3, arenaSize: number, lavaHeight: number): Model
 		lava.Color = Color3.fromRGB(211, 56, 17)
 
 		lava.Touched:Connect(function(hit)
-			if hit.Parent and hit.Parent:FindFirstChildOfClass("Humanoid") then
+			local humanoid = hit.Parent and hit.Parent:FindFirstChildOfClass("Humanoid")
+			if humanoid then
+				humanoid.Health = 0
+				task.wait()
 				hit.Parent:Destroy()
 			end
 
